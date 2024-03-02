@@ -190,7 +190,22 @@ class Level:
         -------
             pygame.sprite.Group
         """
-        return pygame.sprite.Group(self.platform, self.ball)
+        return pygame.sprite.Group(self.platform, self.ball, *self.blocks)
+
+    def adjust_on_x_collision(movable_entity_1, entity_2):
+        # if movable_entity_1 collides with entity_2's left side
+        if movable_entity_1.rect.right > entity_2.rect.left and \
+            movable_entity_1.rect.right < entity_2.rect.right:
+            movable_entity_1.rect.right = entity_2.rect.left
+        # otherwise movable_entity_1 collided with entity_2's right side
+        else:
+            movable_entity_1.rect.left = entity_2.rect.right
+
+        movable_entity_1.speed.x = -movable_entity_1.speed.x
+
+    def adjust_on_y_collision(movable_entity):
+        movable_entity.rect.y -= movable_entity.speed.y
+        movable_entity.speed.y = -movable_entity.speed.y
 
     def process_collisions(self):
         """Process collisions and update objects positions and speeds."""
@@ -205,14 +220,15 @@ class Level:
         # checking collision on the X axis
         self.ball.rect.x += self.ball.speed.x
         if self.ball.is_collided_with(self.platform):
-            # if ball collides with platform's left side
-            if self.ball.rect.right > self.platform.rect.left and \
-                self.ball.rect.right < self.platform.rect.right:
-                self.ball.rect.right = self.platform.rect.left
-            # otherwise ball collided with platform's right side
-            else:
-                self.ball.rect.left = self.platform.rect.right
-            self.ball.speed.x = -self.ball.speed.x
+            # # # if ball collides with platform's left side
+            # # if self.ball.rect.right > self.platform.rect.left and \
+            # #     self.ball.rect.right < self.platform.rect.right:
+            # #     self.ball.rect.right = self.platform.rect.left
+            # # # otherwise ball collided with platform's right side
+            # # else:
+            # #     self.ball.rect.left = self.platform.rect.right
+            # # self.ball.speed.x = -self.ball.speed.x
+            Level.adjust_on_x_collision(self.ball, self.platform)
         # if ball is out of level edges...
         #   on the right edge
         elif self.ball.rect.right > self.edges.right:
@@ -222,12 +238,18 @@ class Level:
         elif self.ball.rect.left < self.edges.left:
             self.ball.rect.left = self.edges.left
             self.ball.speed.x = -self.ball.speed.x
+        else:
+            for block in self.blocks:
+                if self.ball.is_collided_with(block):
+                    Level.adjust_on_x_collision(self.ball, block)
+                    ### break ????
 
         # checking collision on the Y axis
         self.ball.rect.y += self.ball.speed.y
         if self.ball.is_collided_with(self.platform):
-            self.ball.rect.y -= self.ball.speed.y
-            self.ball.speed.y = -self.ball.speed.y
+            # # # self.ball.rect.y -= self.ball.speed.y
+            # # # self.ball.speed.y = -self.ball.speed.y
+            Level.adjust_on_y_collision(self.ball)
         # if ball is out of level edges...
         #   on the bottom edge
         elif self.ball.rect.bottom > self.edges.bottom:
@@ -238,6 +260,11 @@ class Level:
         elif self.ball.rect.top < self.edges.top:
             self.ball.rect.top = self.edges.top
             self.ball.speed.y = -self.ball.speed.y
+        else:
+            for block in self.blocks:
+                if self.ball.is_collided_with(block):
+                    Level.adjust_on_y_collision(self.ball)
+                    ### break ????
 
         # if platform "squeezes" ball to the left or right level edge
         if (self.ball.rect.bottom < self.platform.rect.top or self.ball.rect.top < self.platform.rect.bottom) and \
@@ -307,7 +334,15 @@ class LevelMaker:
             ),
             speed=pygame.Vector2(1, 1)
         )
-        blocks = None
+
+        # blocks = None
+        blocks = [Block(
+            image=self.images['ball'],
+            rect=pygame.Rect(
+                (self.edges_sizes[0] / 2, self.edges_sizes[1] * 0.2),
+                self.images['ball'].get_size()
+            ),
+        )]
 
         return Level(
             blocks=blocks,
