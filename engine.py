@@ -11,6 +11,7 @@ class Entity(pygame.sprite.Sprite):
     rect: pygame.Rect
         The rectangle that contains position and borders of the entity.
     """
+
     def __init__(self, image, rect):
         """Initalize the entity object.
 
@@ -43,13 +44,14 @@ class Entity(pygame.sprite.Sprite):
 
 
 class MovableEntity(Entity):
-    """Base class for movable entities
+    """Base class for movable entities.
 
     Attributes
     ----------
     speed: pygame.Vector2
         The speed vector of the entity
     """
+
     def __init__(self, image, rect, speed):
         """Initalize the movable entity object.
 
@@ -60,41 +62,68 @@ class MovableEntity(Entity):
         rect: pygame.Rect
             The rectangle that contains position and borders of the entity.
         speed: pygame.Vector2
-            The speed vector of the entity
+            The speed vector of the entity.
         """
         Entity.__init__(self, image, rect)
         self.speed = speed
 
     def move(self):
-        """Move the entity"""
+        """Move the entity."""
         self.rect.move_ip(self.speed.x, self.speed.y)
 
 
 class Block(Entity):
-    """Class for destroyble blocks"""
+    """Class for destroyble blocks."""
+
     def __init__(self, image, rect):
         Entity.__init__(self, image, rect)
         self.is_destroyed = False
 
     def is_destroyed(self):
-        """Return whether the block is destroyed or not"""
+        """Return whether the block is destroyed or not."""
         return self.is_destroyed
 
     def set_is_destroyed(self):
-        """Mark the block destroyed"""
+        """Mark the block destroyed."""
         self.is_destroyed = True
 
 
 class Ball(MovableEntity):
     """Class for ball entity."""
+
     def __init__(self, image, rect, speed):
+        """Initalize the ball object.
+
+         Parameters
+        ----------
+        image: pygame.Surface
+            The image of the ball.
+        rect: pygame.Rect
+            The rectangle that contains position and borders of the ball.
+        speed: pygame.Vector2
+            The speed vector of the ball.
+        """
         MovableEntity.__init__(self, image, rect, speed)
 
 
 class Platform(MovableEntity):
     """Class for platform entity.
-    Note: Platform moves only to left or right, so vertical speed is ignored"""
+
+    Note: Platform moves only to left or right, so vertical speed is ignored.
+    """
+
     def __init__(self, image, rect, speed):
+        """Initalize the platform object.
+
+         Parameters
+        ----------
+        image: pygame.Surface
+            The image of the platform.
+        rect: pygame.Rect
+            The rectangle that contains position and borders of the platform.
+        speed: pygame.Vector2
+            The speed vector of the platform.
+        """
         MovableEntity.__init__(self, image, rect, speed)
 
     def move(self):
@@ -107,7 +136,7 @@ class Level:
 
     Attributes
     ----------
-    blocks: list (of Block objects)
+    blocks: list[Block]
         Destroyble blocks of the level.
     platform: Platform
         The movable platform object.
@@ -118,12 +147,13 @@ class Level:
     is_game_over: bool
         This variable indicates whether game ended or not
     """
+
     def __init__(self, blocks, platform, ball, edges):
         """Initalize the level object.
 
         Parameters
         ----------
-        blocks: list (of Block objects)
+        blocks: list[Block]
             Destroyble blocks of the level.
         platform: Platform
             The movable platform object.
@@ -143,7 +173,7 @@ class Level:
 
     def process_key_presses(self):
         """Process key presses and update level objects and state
-            correspondingly
+            correspondingly.
         """
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -154,8 +184,7 @@ class Level:
             self.platform.move()
 
     def get_sprites_group(self):
-        """
-        Return game objects as one group
+        """Return game objects as one group.
 
         Returns
         -------
@@ -164,7 +193,7 @@ class Level:
         return pygame.sprite.Group(self.platform, self.ball)
 
     def process_collisions(self):
-        """Process collisions and update objects positions and speeds"""
+        """Process collisions and update objects positions and speeds."""
 
         #   This function checks collision by firstly moving ball by the X axis
         # and then by Y axis. This allows accuratly determinate whether there is
@@ -233,34 +262,35 @@ class Level:
 
 
 class LevelMaker:
-    """Class for creating level's objects and other data
+    """Class for creating level's objects and other data.
 
     Attributes
     ----------
-    edges_sizes: tuple
+    edges_sizes: tuple[int, int]
         Tulpe that contains width and height of the level in this format:
         (width: int, height: int)
-    images: dict(str : pygame.Surface)
+    images: dict[str, pygame.Surface]
         Dictionary that contains level's objects images in this format:
-        'object type name, string' : 'image, pygame.Surface'
+        'object type name, `str`' : 'image, `pygame.Surface`'
     """
-    def __init__(self, edges_sizes, images):
-    """Initalize the LevelMaker class object.
 
-    Parameters
-    ----------
-    edges_sizes: tuple
-        Tulpe that contains width and height of the level in this format:
-        (width: int, height: int)
-    images: dict(str : pygame.Surface)
-        Dictionary that contains level's objects images in this format:
-        'object type name, string' : 'image, pygame.Surface'
-    """
+    def __init__(self, edges_sizes, images):
+        """Initalize the LevelMaker class object.
+
+        Parameters
+        ----------
+        edges_sizes: tuple[int, int]
+            Tulpe that contains width and height of the level in this format:
+            (width: int, height: int)
+        images: dict[str, pygame.Surface]
+            Dictionary that contains level's objects images in this format:
+            'object type name, `str`' : 'image, `pygame.Surface`'
+        """
         self.edges_sizes = edges_sizes
         self.images = images
 
     def get_level(self):
-    """Get a maked and initialized level"""
+        """Get a maked and initialized level."""
         platform = Platform(
             image=self.images['platform'],
             rect=pygame.Rect(
@@ -288,7 +318,29 @@ class LevelMaker:
 
 
 class Game:
+    """Game application class.
+
+    Attributes
+    ----------
+    edges: tuple[int, int]
+        Tulpe that contains width and height of the level in this format:
+        (width: int, height: int)
+    images: dict[str, pygame.Surface]
+        Dictionary that contains level's objects images in this format:
+        'object type name, `str`' : 'image, `pygame.Surface`'
+    level_maker: LevelMaker
+        The LevelMaker object that do initializeing of the level
+    """
+
     def __init__(self, edges):
+        """Initalize the game application object.
+
+        Parameters
+        ----------
+        edges: list[int, int]
+            Tulpe that contains width and height of the level in this format:
+            (width: int, height: int)
+        """
         self.edges = edges
 
         self.images = {
@@ -304,6 +356,17 @@ class Game:
         )
 
     def draw(self, screen, sprites_group):
+        """Update image of the game.
+
+        Parameters
+        ----------
+        screen: Surface
+            A `Surface` object (created using ``pygame.display.set_mode()``)
+            which contains the final rendered image that is putted on the screen
+
+        sprites_group: pygame.sprite.Group
+            Game objects that needed to be drawn
+        """
         # fill the screen with a color to wipe away anything from last frame
         screen.fill('white')
         sprites_group.draw(screen)
@@ -311,6 +374,7 @@ class Game:
         pygame.display.flip()
 
     def run(self):
+        """Run the game application."""
         # pygame setup
         pygame.init()
         screen = pygame.display.set_mode(self.edges)
