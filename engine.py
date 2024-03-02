@@ -8,108 +8,177 @@ class Entity(pygame.sprite.Sprite):
     ----------
     image: pygame.Surface
         The image of the entity.
-    rect : pygame.Rect
+    rect: pygame.Rect
         The rectangle that contains position and borders of the entity.
     """
     def __init__(self, image, rect):
-        """Initalizes the entity object.
+        """Initalize the entity object.
 
         Parameters
         ----------
-        image : pygame.Surface
+        image: pygame.Surface
             The image of the entity.
-        rect : pygame.Rect
+        rect: pygame.Rect
             The rectangle that contains position and borders of the entity.
         """
         pygame.sprite.Sprite.__init__(self)
         self.image = image
         self.rect = rect
 
-    def is_collided_with(self, other) -> bool:
-        """Checks if the entity is collided with other entity.
+    def is_collided_with(self, other):
+        """Check if the entity is collided with other entity.
 
         Parameters
         ----------
-        other : Entity
+        other: Entity
             The other entity, for which collision check is doing.
 
         Returns
         ------
         bool
-            If there is collision between `self` and `other`, `True` will be returned.
-            Otherwise `False` will be returned.
+            If there is collision between `self` and `other`,
+            `True` will be returned. Otherwise `False` will be returned.
         """
         return pygame.sprite.collide_rect(self, other)
 
 
 class MovableEntity(Entity):
     """Base class for movable entities
+
+    Attributes
+    ----------
+    speed: pygame.Vector2
+        The speed vector of the entity
     """
     def __init__(self, image, rect, speed):
+        """Initalize the movable entity object.
+
+        Parameters
+        ----------
+        image: pygame.Surface
+            The image of the entity.
+        rect: pygame.Rect
+            The rectangle that contains position and borders of the entity.
+        speed: pygame.Vector2
+            The speed vector of the entity
+        """
         Entity.__init__(self, image, rect)
         self.speed = speed
 
     def move(self):
+        """Move the entity"""
         self.rect.move_ip(self.speed.x, self.speed.y)
-
-    def update(self):
-        self.move()
 
 
 class Block(Entity):
+    """Class for destroyble blocks"""
     def __init__(self, image, rect):
         Entity.__init__(self, image, rect)
         self.is_destroyed = False
 
     def is_destroyed(self):
+        """Return whether the block is destroyed or not"""
         return self.is_destroyed
 
     def set_is_destroyed(self):
+        """Mark the block destroyed"""
         self.is_destroyed = True
 
 
 class Ball(MovableEntity):
+    """Class for ball entity."""
     def __init__(self, image, rect, speed):
         MovableEntity.__init__(self, image, rect, speed)
 
 
 class Platform(MovableEntity):
+    """Class for platform entity.
+    Note: Platform moves only to left or right, so vertical speed is ignored"""
     def __init__(self, image, rect, speed):
         MovableEntity.__init__(self, image, rect, speed)
 
     def move(self):
+        """Move platform to left or right"""
         self.rect.move_ip(self.speed.x, 0)
 
 
 class Level:
-    def __init__(self, blocks, platform, ball, width, height):
+    """Class for level objects and logic.
+
+    Attributes
+    ----------
+    blocks: list (of Block objects)
+        Destroyble blocks of the level.
+    platform: Platform
+        The movable platform object.
+    ball: Ball
+        The movable ball object.
+    edges: pygame.Rect
+        Rectangle that contains width and height of the level
+    is_game_over: bool
+        This variable indicates whether game ended or not
+    """
+    def __init__(self, blocks, platform, ball, edges):
+        """Initalize the level object.
+
+        Parameters
+        ----------
+        blocks: list (of Block objects)
+            Destroyble blocks of the level.
+        platform: Platform
+            The movable platform object.
+        ball: Ball
+            The movable ball object.
+        edges: tuple
+            Tulpe that contains width and height of the level in this format:
+            (width: int, height: int)
+        """
         self.blocks = blocks
         self.platform = platform
         self.ball = ball
 
-        self.width = width
-        self.height = height
+        self.edges = pygame.Rect((0, 0), edges)
 
         self.is_game_over = False
 
     def process_key_presses(self):
+        """Process key presses and update level objects and state
+            correspondingly
+        """
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             self.platform.speed.x = -abs(self.platform.speed.x)
-            self.platform.update()
+            self.platform.move()
         if keys[pygame.K_d]:
             self.platform.speed.x = abs(self.platform.speed.x)
-            self.platform.update()
+            self.platform.move()
 
     def get_sprites_group(self):
+        """
+        Return game objects as one group
+
+        Returns
+        -------
+            pygame.sprite.Group
+        """
         return pygame.sprite.Group(self.platform, self.ball)
 
-    def check_collisions(self):
+    def process_collisions(self):
+        """Process collisions and update objects positions and speeds"""
+
+        #   This function checks collision by firstly moving ball by the X axis
+        # and then by Y axis. This allows accuratly determinate whether there is
+        # collision wit left / right or top / bottom sides of platform:
+        # if while moving on the X axis there is collison, it is obvious that
+        # collison occured on left or right side; the same applies to the Y
+        # axis.
+
         # checking collision on the X axis
         self.ball.rect.x += self.ball.speed.x
         if self.ball.is_collided_with(self.platform):
             # if ball collides with platform's left side
-            if self.ball.rect.right > self.platform.rect.left and self.ball.rect.right < self.platform.rect.right:
+            if self.ball.rect.right > self.platform.rect.left and \
+                self.ball.rect.right < self.platform.rect.right:
                 self.ball.rect.right = self.platform.rect.left
             # otherwise ball collided with platform's right side
             else:
@@ -117,12 +186,12 @@ class Level:
             self.ball.speed.x = -self.ball.speed.x
         # if ball is out of level edges...
         #   on the right edge
-        elif self.ball.rect.right > self.width:
-            self.ball.rect.right = self.width
+        elif self.ball.rect.right > self.edges.right:
+            self.ball.rect.right = self.edges.right
             self.ball.speed.x = -self.ball.speed.x
         #   on the left edge
-        elif self.ball.rect.left < 0:
-            self.ball.rect.left = 0
+        elif self.ball.rect.left < self.edges.left:
+            self.ball.rect.left = self.edges.left
             self.ball.speed.x = -self.ball.speed.x
 
         # checking collision on the Y axis
@@ -132,42 +201,66 @@ class Level:
             self.ball.speed.y = -self.ball.speed.y
         # if ball is out of level edges...
         #   on the bottom edge
-        elif self.ball.rect.bottom > self.height:
-            self.ball.rect.bottom = self.height
+        elif self.ball.rect.bottom > self.edges.bottom:
+            self.ball.rect.bottom = self.edges.bottom
             self.ball.speed.y = -self.ball.speed.y
         #   on the top edge
-        elif self.ball.rect.top < 0:
-            self.ball.rect.top = 0
+        # elif self.ball.rect.top < 0:
+        elif self.ball.rect.top < self.edges.top:
+            self.ball.rect.top = self.edges.top
             self.ball.speed.y = -self.ball.speed.y
 
         # if platform "squeezes" ball to the left or right level edge
         if (self.ball.rect.bottom < self.platform.rect.top or self.ball.rect.top < self.platform.rect.bottom) and \
-            (self.ball.rect.right > self.width or self.ball.rect.left < 0):
+            (self.ball.rect.right > self.edges.right or self.ball.rect.left < self.edges.left):
             self.ball.rect.top = self.platform.rect.bottom
 
         # if platform out of level edges...
         #   on the right edge
-        if self.platform.rect.right > self.width:
-            self.platform.rect.right = self.width
+        if self.platform.rect.right > self.edges.right:
+            self.platform.rect.right = self.edges.right
             self.platform.speed.x = -self.platform.speed.x
         #   on the left edge
-        elif self.platform.rect.left < 0:
-            self.platform.rect.left = 0
+        elif self.platform.rect.left < self.edges.left:
+            self.platform.rect.left = self.edges.left
             self.platform.speed.x = -self.platform.speed.x
 
 
     def update(self):
+        """Do updates of the level's state and objects"""
         self.process_key_presses()
-        self.check_collisions()
-
+        self.process_collisions()
 
 
 class LevelMaker:
+    """Class for creating level's objects and other data
+
+    Attributes
+    ----------
+    edges_sizes: tuple
+        Tulpe that contains width and height of the level in this format:
+        (width: int, height: int)
+    images: dict(str : pygame.Surface)
+        Dictionary that contains level's objects images in this format:
+        'object type name, string' : 'image, pygame.Surface'
+    """
     def __init__(self, edges_sizes, images):
+    """Initalize the LevelMaker class object.
+
+    Parameters
+    ----------
+    edges_sizes: tuple
+        Tulpe that contains width and height of the level in this format:
+        (width: int, height: int)
+    images: dict(str : pygame.Surface)
+        Dictionary that contains level's objects images in this format:
+        'object type name, string' : 'image, pygame.Surface'
+    """
         self.edges_sizes = edges_sizes
         self.images = images
 
     def get_level(self):
+    """Get a maked and initialized level"""
         platform = Platform(
             image=self.images['platform'],
             rect=pygame.Rect(
@@ -190,8 +283,7 @@ class LevelMaker:
             blocks=blocks,
             platform=platform,
             ball=ball,
-            width=self.edges_sizes[0],
-            height=self.edges_sizes[1]
+            edges=self.edges_sizes
         )
 
 
@@ -207,7 +299,7 @@ class Game:
         self.images['ball'].fill((0, 0, 0))
 
         self.level_maker = LevelMaker(
-            (self.edges[0], self.edges[1]),
+            self.edges,
             self.images
         )
 
