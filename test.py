@@ -3,8 +3,8 @@ import engine
 # # # Example file showing a circle moving on screen
 import pygame
 
-# engine.Game((700, 500)).run()
-engine.Game((200, 200)).run()
+engine.Game((700, 500), 10).run()
+# engine.Game((200, 200), 10).run()
 
 
 # # pygame setup
