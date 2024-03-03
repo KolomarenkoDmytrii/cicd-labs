@@ -171,6 +171,8 @@ class Level:
 
         self.is_game_over = False
 
+        self.score = 0
+
     def process_key_presses(self):
         """Process key presses and update level objects and state
             correspondingly.
@@ -220,14 +222,6 @@ class Level:
         # checking collision on the X axis
         self.ball.rect.x += self.ball.speed.x
         if self.ball.is_collided_with(self.platform):
-            # # # if ball collides with platform's left side
-            # # if self.ball.rect.right > self.platform.rect.left and \
-            # #     self.ball.rect.right < self.platform.rect.right:
-            # #     self.ball.rect.right = self.platform.rect.left
-            # # # otherwise ball collided with platform's right side
-            # # else:
-            # #     self.ball.rect.left = self.platform.rect.right
-            # # self.ball.speed.x = -self.ball.speed.x
             Level.adjust_on_x_collision(self.ball, self.platform)
         # if ball is out of level edges...
         #   on the right edge
@@ -242,7 +236,7 @@ class Level:
             for block in self.blocks:
                 if self.ball.is_collided_with(block):
                     Level.adjust_on_x_collision(self.ball, block)
-                    ### break ????
+                    block.set_is_destroyed()
 
         # checking collision on the Y axis
         self.ball.rect.y += self.ball.speed.y
@@ -264,7 +258,7 @@ class Level:
             for block in self.blocks:
                 if self.ball.is_collided_with(block):
                     Level.adjust_on_y_collision(self.ball)
-                    ### break ????
+                    block.set_is_destroyed()
 
         # if platform "squeezes" ball to the left or right level edge
         if (self.ball.rect.bottom < self.platform.rect.top or self.ball.rect.top < self.platform.rect.bottom) and \
@@ -286,6 +280,12 @@ class Level:
         """Do updates of the level's state and objects"""
         self.process_key_presses()
         self.process_collisions()
+
+        for block in self.blocks:
+            if block.is_destroyed:
+                self.blocks.remove(block)
+                self.score += 100
+                print('Score:', self.score)
 
 
 class LevelMaker:
@@ -336,13 +336,23 @@ class LevelMaker:
         )
 
         # blocks = None
-        blocks = [Block(
-            image=self.images['ball'],
-            rect=pygame.Rect(
-                (self.edges_sizes[0] / 2, self.edges_sizes[1] * 0.2),
-                self.images['ball'].get_size()
+        blocks = [
+            Block(
+                image=self.images['block'],
+                rect=pygame.Rect(
+                    (self.edges_sizes[0] / 2, self.edges_sizes[1] * 0.2),
+                    self.images['block'].get_size()
+                )
             ),
-        )]
+            Block(
+                image=self.images['block'],
+                rect=pygame.Rect(
+                    (self.edges_sizes[0] / 3, self.edges_sizes[1] * 0.1),
+                    self.images['block'].get_size()
+                )
+            ),
+
+        ]
 
         return Level(
             blocks=blocks,
@@ -380,10 +390,12 @@ class Game:
 
         self.images = {
             'platform': pygame.Surface((65, 20)),
-            'ball': pygame.Surface((20, 20))
+            'ball': pygame.Surface((15, 15)),
+            'block': pygame.Surface((35, 20))
         }
         self.images['platform'].fill((0, 0, 0))
         self.images['ball'].fill((0, 0, 0))
+        self.images['block'].fill((0, 0, 0))
 
         self.level_maker = LevelMaker(
             self.edges,
