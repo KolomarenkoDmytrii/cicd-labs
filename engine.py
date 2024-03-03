@@ -1,3 +1,5 @@
+# TODO: Merge LevelMaker class functionality into Game class
+
 import pygame
 
 
@@ -145,7 +147,9 @@ class Level:
     edges: pygame.Rect
         Rectangle that contains width and height of the level
     is_game_over: bool
-        This variable indicates whether game ended or not
+        This variable indicates whether game ended or not\
+    score: int
+        Contains game score value
     """
 
     def __init__(self, blocks, platform, ball, edges):
@@ -169,8 +173,7 @@ class Level:
 
         self.edges = pygame.Rect((0, 0), edges)
 
-        self.is_game_over = False
-
+        self.is_game_over = False # not used
         self.score = 0
 
     def process_key_presses(self):
@@ -178,6 +181,7 @@ class Level:
             correspondingly.
         """
         keys = pygame.key.get_pressed()
+
         if keys[pygame.K_a]:
             self.platform.speed.x = -abs(self.platform.speed.x)
             self.platform.move()
@@ -195,6 +199,16 @@ class Level:
         return pygame.sprite.Group(self.platform, self.ball, *self.blocks)
 
     def adjust_on_x_collision(movable_entity_1, entity_2):
+        """Process collisions on X axis bewtween movable entity and other (any)
+            entity and update their positions and speeds.
+
+        Parameters
+        ----------
+        movable_entity_1: MovableEntity
+            A movable entity.
+        entity_2: Entity
+            Another entity that can be movable or not.
+        """
         # if movable_entity_1 collides with entity_2's left side
         if movable_entity_1.rect.right > entity_2.rect.left and \
             movable_entity_1.rect.right < entity_2.rect.right:
@@ -206,6 +220,16 @@ class Level:
         movable_entity_1.speed.x = -movable_entity_1.speed.x
 
     def adjust_on_y_collision(movable_entity):
+        """Process collisions on Y axis bewtween movable entity and other (any)
+            entity and update their positions and speeds.
+
+        Parameters
+        ----------
+        movable_entity_1: MovableEntity
+            A movable entity.
+        entity_2: Entity
+            Another entity that can be movable or not.
+        """
         movable_entity.rect.y -= movable_entity.speed.y
         movable_entity.speed.y = -movable_entity.speed.y
 
@@ -241,8 +265,6 @@ class Level:
         # checking collision on the Y axis
         self.ball.rect.y += self.ball.speed.y
         if self.ball.is_collided_with(self.platform):
-            # # # self.ball.rect.y -= self.ball.speed.y
-            # # # self.ball.speed.y = -self.ball.speed.y
             Level.adjust_on_y_collision(self.ball)
         # if ball is out of level edges...
         #   on the bottom edge
@@ -307,9 +329,15 @@ class LevelMaker:
             - 'platform' for Platform object;
             - 'ball' for Ball object;
             - 'block' for Block objects.
+    horizontal_margin: int
+        Horizontal margin between blocks.
+    vertical_margin: int
+        Vertical margin between blocks.
+    num_of_rows:
+        Number of rows of blocks.
     """
 
-    def __init__(self, edges, images, horizontal_margin, vertical_margin):
+    def __init__(self, edges, images, blocks_layout):
         """Initalize the LevelMaker class object.
 
         Parameters
@@ -320,11 +348,21 @@ class LevelMaker:
         images: dict[str, pygame.Surface]
             Dictionary that contains level's objects images in this format:
             'object type name, `str`' : 'image, `pygame.Surface`'
+            Object types name can be:
+                - 'platform' for Platform object;
+                - 'ball' for Ball object;
+                - 'block' for Block objects.
+        blocks_layout: dict[str, int]
+            Dictionary that contains blocks layout. Dictionary keys are follows:
+                - 'horizontal_margin': horizontal margin between blocks;
+                - 'vertical_margin': vertical margin between blocks;
+                - 'num_of_rows': number of rows of blocks.
         """
         self.edges = edges
         self.images = images
-        self.horizontal_margin = horizontal_margin
-        self.vertical_margin = vertical_margin
+        self.horizontal_margin = blocks_layout['horizontal_margin']
+        self.vertical_margin = blocks_layout['vertical_margin']
+        self.num_of_rows = blocks_layout['num_of_rows']
 
     def get_level(self):
         """Get a maked and initialized level."""
@@ -349,35 +387,13 @@ class LevelMaker:
             )
         )
 
-        # blocks = None
-        # blocks = [
-        #     Block(
-        #         image=self.images['block'],
-        #         rect=pygame.Rect(
-        #             (self.edges[0] / 2, self.edges[1] * 0.2),
-        #             self.images['block'].get_size()
-        #         )
-        #     ),
-        #     Block(
-        #         image=self.images['block'],
-        #         rect=pygame.Rect(
-        #             (self.edges[0] / 3, self.edges[1] * 0.1),
-        #             self.images['block'].get_size()
-        #         )
-        #     ),
-        #
-        # ]
-
+        # placing blocks
         blocks = []
 
-        # horizontal_margin = self.edges[0] * 0.03
-        # vertical_margin = self.edges[1] * 0.06
-
         x = self.horizontal_margin
-        y = ball.rect.height * 2.2
-        NUM_OF_ROWS = 5
+        y = round(ball.rect.height * 2.2)
 
-        for _ in range(0, NUM_OF_ROWS):
+        for _ in range(0, self.num_of_rows):
             while x + self.images['block'].get_size()[0] < self.edges[0]:
                 blocks.append(Block(
                     image=self.images['block'],
@@ -414,7 +430,7 @@ class Game:
         The LevelMaker object that do initializeing of the level
     """
 
-    def __init__(self, edges, num_of_columns):
+    def __init__(self, edges, num_of_columns, num_of_rows):
         """Initalize the game application object.
 
         Parameters
@@ -422,15 +438,15 @@ class Game:
         edges: list[int, int]
             Tulpe that contains width and height of the level in this format:
             (width: int, height: int)
+        num_of_columns: int
+            Number of columns of blocks.
+        num_of_rows: int
+            Number of rows of blocks.
         """
         self.edges = edges
 
-        horizontal_margin = self.edges[0] * 0.03
+        horizontal_margin = round(self.edges[0] * 0.03)
 
-        # block_width = round(
-        #     self.edges[0] * (1 - 0.03 * 2 - 0.03 * num_of_columns) /
-        #         num_of_columns
-        # )
         block_width = round(
             (self.edges[0] - horizontal_margin * 2 - horizontal_margin * num_of_columns) /
                 num_of_columns
@@ -448,8 +464,11 @@ class Game:
         self.level_maker = LevelMaker(
             edges=self.edges,
             images=self.images,
-            horizontal_margin=horizontal_margin,
-            vertical_margin=self.edges[1] * 0.06
+            blocks_layout={
+                'horizontal_margin': horizontal_margin,
+                'vertical_margin': round(self.edges[1] * 0.06),
+                'num_of_rows': num_of_rows
+            }
         )
 
     def draw(self, screen, sprites_group):
@@ -479,6 +498,7 @@ class Game:
 
         # game setup
         running = True
+        is_paused = False
         level = self.level_maker.get_level()
 
         while running:
@@ -487,10 +507,16 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        is_paused = not is_paused
+                    if event.key == pygame.K_q:
+                        running = False
 
             self.draw(screen, level.get_sprites_group())
 
-            level.update()
+            if not is_paused:
+                level.update()
 
             # limits FPS to 60
             clock.tick(60)
