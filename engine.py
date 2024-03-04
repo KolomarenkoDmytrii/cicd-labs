@@ -451,6 +451,27 @@ class LevelMaker:
         )
 
 
+class Label:
+    def __init__(self, font, position: pygame.Vector2, text='', color=(0, 0, 0)):
+        self.font = font
+        self.position = position
+        self.text = text
+        self.color = color
+
+        self.render()
+
+    def get_rendered(self):
+        return (self.text_image, self.text_image_rect)
+
+    def set_text(self, text):
+        self.text = text
+        self.render()
+
+    def render(self):
+        self.text_image = self.font.render(self.text, True, self.color)
+        self.text_image_rect = self.text_image.get_rect(x=self.position.x, y=self.position.y)
+
+
 class Game:
     """Game application class.
 
@@ -507,7 +528,7 @@ class Game:
             }
         )
 
-    def draw(self, screen, sprites_group):
+    def draw(self, screen, sprites_group, labels):
         """Update the image of the game.
 
         Parameters
@@ -522,7 +543,12 @@ class Game:
         # fill the screen with a color to wipe away anything from last frame
         screen.fill('white')
         sprites_group.draw(screen)
-        # flip() the display to put your work on screen
+
+        for label in labels:
+            screen.blit(*label.get_rendered())
+        # screen.blit(text, textpos)
+
+        # flip() the display to put work on screen
         pygame.display.flip()
 
     def run(self):
@@ -531,6 +557,10 @@ class Game:
         pygame.init()
         screen = pygame.display.set_mode(self.edges)
         clock = pygame.time.Clock()
+        font = pygame.font.SysFont('roboto', 20)
+
+        score_count = Label(font, pygame.Vector2(screen.get_width() / 2, 10), 'Score: 0')
+        lifes_count = Label(font, pygame.Vector2(screen.get_width() / 4, 10), 'Lifes: ?')
 
         # game setup
         running = True
@@ -549,7 +579,10 @@ class Game:
                     if event.key == pygame.K_q:
                         running = False
 
-            self.draw(screen, level.get_sprites_group())
+            score_count.set_text(f'Score: {level.get_game_state().score}')
+            lifes_count.set_text(f'Lifes: {level.get_game_state().lifes}')
+
+            self.draw(screen, level.get_sprites_group(), [score_count, lifes_count])
 
             if not (is_paused or level.get_game_state().is_game_over):
                 level.update()
