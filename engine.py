@@ -1,6 +1,7 @@
-# TODO: Merge LevelMaker class functionality into Game class
-
 import pygame
+import copy
+
+from dataclasses import dataclass
 
 
 class Entity(pygame.sprite.Sprite):
@@ -75,7 +76,7 @@ class MovableEntity(Entity):
 
 
 class Block(Entity):
-    """Class for destroyble blocks."""
+    """Class for destroyable blocks."""
 
     def __init__(self, image, rect):
         Entity.__init__(self, image, rect)
@@ -133,13 +134,19 @@ class Platform(MovableEntity):
         self.rect.move_ip(self.speed.x, 0)
 
 
+@dataclass
+class Edges:
+    width: int
+    height: int
+
+
 class Level:
     """Class for level objects and logic.
 
     Attributes
     ----------
     blocks: list[Block]
-        Destroyble blocks of the level.
+        Destroyable blocks of the level.
     platform: Platform
         The movable platform object.
     ball: Ball
@@ -147,10 +154,18 @@ class Level:
     edges: pygame.Rect
         Rectangle that contains width and height of the level
     is_game_over: bool
-        This variable indicates whether game ended or not\
+        This variable indicates whether game ended or not.
     score: int
         Contains game score value
     """
+
+    @dataclass
+    class GameState:
+        ball_proto_rect: pygame.Rect
+        ball_proto_speed: pygame.Vector2
+        score: int = 0
+        lifes: int = 3
+        is_game_over: bool = False
 
     def __init__(self, blocks, platform, ball, edges):
         """Initalize the level object.
@@ -158,7 +173,7 @@ class Level:
         Parameters
         ----------
         blocks: list[Block]
-            Destroyble blocks of the level.
+            Destroyable blocks of the level.
         platform: Platform
             The movable platform object.
         ball: Ball
@@ -173,21 +188,22 @@ class Level:
 
         self.edges = pygame.Rect((0, 0), edges)
 
-        self.is_game_over = False # not used
-        self.score = 0
+        # # # T-ODO (?): Place this (game state management) in GameState class
+        # # self.ball_proto_rect = copy.deepcopy(self.ball.rect)
+        # # self.ball_proto_speed = copy.deepcopy(self.ball.speed)
+        # # self.is_game_over = False # not used
+        # # self.score = 0
+        # # self.lifes = 3
 
-    def process_key_presses(self):
-        """Process key presses and update level objects and state
-            correspondingly.
-        """
-        keys = pygame.key.get_pressed()
+        self.state = Level.GameState(copy.deepcopy(self.ball.rect), copy.deepcopy(self.ball.speed))
 
-        if keys[pygame.K_a]:
-            self.platform.speed.x = -abs(self.platform.speed.x)
-            self.platform.move()
-        if keys[pygame.K_d]:
-            self.platform.speed.x = abs(self.platform.speed.x)
-            self.platform.move()
+
+    def reset_ball(self):
+        self.ball.rect = copy.deepcopy(self.state.ball_proto_rect)
+        self.ball.speed = copy.deepcopy(self.state.ball_proto_speed)
+
+    def get_game_state(self):
+        return self.state
 
     def get_sprites_group(self):
         """Return game objects as one group.
@@ -233,6 +249,19 @@ class Level:
         movable_entity.rect.y -= movable_entity.speed.y
         movable_entity.speed.y = -movable_entity.speed.y
 
+    def process_key_presses(self):
+        """Process key presses and update level objects and state
+            correspondingly.
+        """
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_a]:
+            self.platform.speed.x = -abs(self.platform.speed.x)
+            self.platform.move()
+        if keys[pygame.K_d]:
+            self.platform.speed.x = abs(self.platform.speed.x)
+            self.platform.move()
+
     def process_collisions(self):
         """Process collisions and update objects positions and speeds."""
 
@@ -269,8 +298,11 @@ class Level:
         # if ball is out of level edges...
         #   on the bottom edge
         elif self.ball.rect.bottom > self.edges.bottom:
-            self.ball.rect.bottom = self.edges.bottom
-            self.ball.speed.y = -self.ball.speed.y
+            # # # self.ball.rect.bottom = self.edges.bottom
+            # # # self.ball.speed.y = -self.ball.speed.y
+            self.reset_ball()
+            self.state.lifes -= 1
+            print('Lifes:', self.state.lifes)
         #   on the top edge
         # elif self.ball.rect.top < 0:
         elif self.ball.rect.top < self.edges.top:
@@ -310,10 +342,14 @@ class Level:
         for block in self.blocks:
             if block.is_destroyed:
                 self.blocks.remove(block)
-                self.score += 100
-                print('Score:', self.score)
+                self.state.score += 100
+                print('Score:', self.state.score)
+
+        if self.state.lifes < 1:
+            self.state.is_game_over = True
 
 
+# TODO (?): Merge LevelMaker class functionality into Game class
 class LevelMaker:
     """Class for creating level's objects and other data.
 
@@ -515,8 +551,11 @@ class Game:
 
             self.draw(screen, level.get_sprites_group())
 
-            if not is_paused:
+            if not (is_paused or level.get_game_state().is_game_over):
                 level.update()
+
+            # if level.get_game_state().is_game_over:
+            #     is_paused = True
 
             # limits FPS to 60
             clock.tick(60)
