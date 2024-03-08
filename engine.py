@@ -158,7 +158,9 @@ class Level:
     platform: Platform
         The movable platform object.
     ball: Ball
-        The movable ball object.
+        The movable ball object. Contains speed of the released speed. Also
+        because ball before its releasing "tied" to platform, initial position
+        is ignored.
     edges: pygame.Rect
         Rectangle that contains width and height of the level
     state: GameState
@@ -173,7 +175,7 @@ class Level:
         ----------
         ball_proto_rect: pygame.Rect
             Initial rectangle of the level ball.
-        ball_proto_speed: pygame.Vector2
+        ball_released_speed: pygame.Vector2
             Initial speed of the level ball.
         score: int
             Game score of the level.
@@ -182,13 +184,13 @@ class Level:
         is_game_over: bool
             Indicates whether game is ended or not.
         """
-        ball_proto_rect: pygame.Rect
-        ball_proto_speed: pygame.Vector2
+        ball_released_speed: pygame.Vector2
         score: int = 0
-        lifes: int = 3
+        lifes: int = 4
         is_game_over: bool = False
+        is_ball_released: bool = False
 
-    def __init__(self, blocks, platform, ball, edges, top_start):
+    def __init__(self, lifes, blocks, platform, ball, edges, top_start):
         """Initalize the level object.
 
         Parameters
@@ -199,7 +201,7 @@ class Level:
             The movable platform object.
         ball: Ball
             The movable ball object.
-        edges: tuple
+        edges: Edges
             Tulpe that contains width and height of the level in this format:
             (width: int, height: int)
         top_start: int
@@ -209,22 +211,27 @@ class Level:
         self.platform = platform
         self.ball = ball
 
-        self.edges = pygame.Rect((0, top_start), edges)
+        self.edges = pygame.Rect((0, top_start), (edges.width, edges.height))
 
-        # # # T-ODO (?): Place this (game state management) in GameState class
-        # # self.ball_proto_rect = copy.deepcopy(self.ball.rect)
-        # # self.ball_proto_speed = copy.deepcopy(self.ball.speed)
-        # # self.is_game_over = False # not used
-        # # self.score = 0
-        # # self.lifes = 3
+        self.state = Level.GameState(
+            ball_released_speed=copy.deepcopy(self.ball.speed),
+            lifes=lifes
+        )
 
-        self.state = Level.GameState(copy.deepcopy(self.ball.rect), copy.deepcopy(self.ball.speed))
+        self.reset_ball()
 
 
     def reset_ball(self):
         """Reset state of the level ball to its initial state."""
-        self.ball.rect = copy.deepcopy(self.state.ball_proto_rect)
-        self.ball.speed = copy.deepcopy(self.state.ball_proto_speed)
+        # self.ball.rect = copy.deepcopy(self.state.ball_proto_rect)
+        self.ball.rect.bottom = self.platform.rect.top
+        self.ball.rect.centerx = self.platform.rect.centerx
+        self.ball.speed = pygame.Vector2(0, 0)
+        self.state.is_ball_released = False
+
+    def release_ball(self):
+        self.state.is_ball_released = True
+        self.ball.speed = copy.deepcopy(self.state.ball_released_speed)
 
     def get_game_state(self):
         """Return game state of the level.
@@ -283,14 +290,22 @@ class Level:
         """Process key presses and update level objects and state
             correspondingly.
         """
+        def update():
+            self.platform.move()
+            if not self.state.is_ball_released:
+                self.ball.rect.bottom = self.platform.rect.top
+                self.ball.rect.centerx = self.platform.rect.centerx
+
+
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
             self.platform.speed.x = -abs(self.platform.speed.x)
-            self.platform.move()
+            update()
         if keys[pygame.K_d]:
             self.platform.speed.x = abs(self.platform.speed.x)
-            self.platform.move()
+            # self.platform.move()
+            update()
 
     def process_collisions(self):
         """Process collisions and update objects positions and speeds."""
@@ -374,12 +389,13 @@ class Level:
                 self.blocks.remove(block)
                 self.state.score += 100
                 print('Score:', self.state.score)
+                # self.ball.speed += self.state.ball_released_speed * 0.1
+                self.ball.speed *= 1.02
 
         if self.state.lifes < 1:
             self.state.is_game_over = True
 
 
-# TODO (?): Merge LevelMaker class functionality into Game class
 class LevelMaker:
     """Class for creating level's objects and other data.
 
@@ -435,7 +451,7 @@ class LevelMaker:
         platform = Platform(
             image=self.images['platform'],
             rect=pygame.Rect(
-                (self.edges[0] / 2, self.edges[1] * 0.6),
+                (self.edges.width / 2, self.edges.height * 0.75),
                 self.images['platform'].get_size()
             ),
             speed=pygame.Vector2(5, 0)
@@ -443,12 +459,12 @@ class LevelMaker:
         ball = Ball(
             image=self.images['ball'],
             rect=pygame.Rect(
-                (self.edges[0] / 2, self.edges[1] * 0.4),
+                (0, 0),
                 self.images['ball'].get_size()
             ),
             speed=pygame.Vector2(
-                round(self.edges[1] * 0.005),
-                round(self.edges[1] * 0.005)
+                round(self.edges.height * 0.005),
+                -round(self.edges.height * 0.005)
             )
         )
 
@@ -461,7 +477,7 @@ class LevelMaker:
         y = round(ball.rect.height * 2.2 + top_margin)
 
         for _ in range(0, self.num_of_rows):
-            while x + self.images['block'].get_size()[0] < self.edges[0]:
+            while x + self.images['block'].get_size()[0] < self.edges.width:
                 blocks.append(Block(
                     image=self.images['block'],
                     rect=pygame.Rect(
@@ -475,6 +491,7 @@ class LevelMaker:
             y += self.vertical_margin
 
         return Level(
+            lifes=4,
             blocks=blocks,
             platform=platform,
             ball=ball,
@@ -565,7 +582,7 @@ class Game:
 
         Parameters
         ----------
-        edges: list[int, int]
+        edges: Edges
             Tulpe that contains width and height of the level in this format:
             (width: int, height: int)
         num_of_columns: int
@@ -575,10 +592,10 @@ class Game:
         """
         self.edges = edges
 
-        horizontal_margin = round(self.edges[0] * 0.03)
+        horizontal_margin = round(self.edges.width * 0.03)
 
         block_width = round(
-            (self.edges[0] - horizontal_margin * 2 - horizontal_margin * num_of_columns) /
+            (self.edges.width - horizontal_margin * 2 - horizontal_margin * num_of_columns) /
                 num_of_columns
         )
 
@@ -596,7 +613,7 @@ class Game:
             images=self.images,
             blocks_layout={
                 'horizontal_margin': horizontal_margin,
-                'vertical_margin': round(self.edges[1] * 0.06),
+                'vertical_margin': round(self.edges.height * 0.06),
                 'num_of_rows': num_of_rows
             }
         )
@@ -625,7 +642,7 @@ class Game:
         for label in labels:
             screen.blit(*label.get_rendered())
 
-        pygame.draw.line(screen, (0, 0, 0), (0, y_of_delimiter), (self.edges[0], y_of_delimiter))
+        pygame.draw.line(screen, (0, 0, 0), (0, y_of_delimiter), (self.edges.width, y_of_delimiter))
 
         # flip() the display to put work on screen
         pygame.display.flip()
@@ -634,7 +651,7 @@ class Game:
         """Run the game application."""
         # pygame setup
         pygame.init()
-        screen = pygame.display.set_mode(self.edges)
+        screen = pygame.display.set_mode((self.edges.width, self.edges.height))
         clock = pygame.time.Clock()
         font = pygame.font.SysFont('roboto', 20)
 
@@ -659,6 +676,9 @@ class Game:
                         is_paused = not is_paused
                     if event.key == pygame.K_q:
                         running = False
+                    if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
+                        level.release_ball()
+                        print('ball is released')
 
             score_count.set_text(f'Score: {level.get_game_state().score}')
             lifes_count.set_text(f'Lifes: {level.get_game_state().lifes}')
