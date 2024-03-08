@@ -1,6 +1,5 @@
 import pygame
 import copy
-
 from dataclasses import dataclass
 
 
@@ -189,7 +188,7 @@ class Level:
         lifes: int = 3
         is_game_over: bool = False
 
-    def __init__(self, blocks, platform, ball, edges):
+    def __init__(self, blocks, platform, ball, edges, top_start):
         """Initalize the level object.
 
         Parameters
@@ -203,12 +202,14 @@ class Level:
         edges: tuple
             Tulpe that contains width and height of the level in this format:
             (width: int, height: int)
+        top_start: int
+            Says where the top of game area lays.
         """
         self.blocks = blocks
         self.platform = platform
         self.ball = ball
 
-        self.edges = pygame.Rect((0, 0), edges)
+        self.edges = pygame.Rect((0, top_start), edges)
 
         # # # T-ODO (?): Place this (game state management) in GameState class
         # # self.ball_proto_rect = copy.deepcopy(self.ball.rect)
@@ -445,7 +446,6 @@ class LevelMaker:
                 (self.edges[0] / 2, self.edges[1] * 0.4),
                 self.images['ball'].get_size()
             ),
-            # speed=pygame.Vector2(1, 1)
             speed=pygame.Vector2(
                 round(self.edges[1] * 0.005),
                 round(self.edges[1] * 0.005)
@@ -456,7 +456,9 @@ class LevelMaker:
         blocks = []
 
         x = self.horizontal_margin
-        y = round(ball.rect.height * 2.2)
+
+        top_margin = ball.rect.height * 3
+        y = round(ball.rect.height * 2.2 + top_margin)
 
         for _ in range(0, self.num_of_rows):
             while x + self.images['block'].get_size()[0] < self.edges[0]:
@@ -476,7 +478,8 @@ class LevelMaker:
             blocks=blocks,
             platform=platform,
             ball=ball,
-            edges=self.edges
+            edges=self.edges,
+            top_start=top_margin
         )
 
 
@@ -598,7 +601,7 @@ class Game:
             }
         )
 
-    def draw(self, screen, sprites_group, labels):
+    def draw(self, screen, sprites_group, labels, y_of_delimiter):
         """Update the image of the game.
 
         Parameters
@@ -611,6 +614,9 @@ class Game:
             Game objects that needed to be drawn.
         labels: list[Label]
             Text label that needed to be drawn.
+        y_of_delimiter: int
+            Says where on Y axis draw the line that delimiters game area and
+            game counters.
         """
         # fill the screen with a color to wipe away anything from last frame
         screen.fill('white')
@@ -618,7 +624,8 @@ class Game:
 
         for label in labels:
             screen.blit(*label.get_rendered())
-        # screen.blit(text, textpos)
+
+        pygame.draw.line(screen, (0, 0, 0), (0, y_of_delimiter), (self.edges[0], y_of_delimiter))
 
         # flip() the display to put work on screen
         pygame.display.flip()
@@ -631,9 +638,11 @@ class Game:
         clock = pygame.time.Clock()
         font = pygame.font.SysFont('roboto', 20)
 
+        # creating text labels
         score_count = Label(font, pygame.Vector2(screen.get_width() / 2, 10), 'Score: 0')
         lifes_count = Label(font, pygame.Vector2(screen.get_width() / 4, 10), 'Lifes: ?')
         game_over_label = Label(font, pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), 'GAME OVER')
+        victory_label = Label(font, pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), 'YOU WIN!')
         paused_label = Label(font, pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), 'PAUSE')
 
         # game setup
@@ -642,8 +651,6 @@ class Game:
         level = self.level_maker.get_level()
 
         while running:
-            # poll for events
-            # pygame.QUIT event means the user clicked X to close your window
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -663,10 +670,13 @@ class Game:
                 labels.append(paused_label)
             elif level.get_game_state().is_game_over:
                 labels.append(game_over_label)
+            # if all blocks are cleared, player wins
+            elif len(level.blocks) == 0:
+                labels.append(victory_label)
             else:
                 level.update()
 
-            self.draw(screen, level.get_sprites_group(), labels)
+            self.draw(screen, level.get_sprites_group(), labels, level.edges.top)
 
 
             # if level.get_game_state().is_game_over:
