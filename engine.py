@@ -97,7 +97,7 @@ class Ball(MovableEntity):
     def __init__(self, image, rect, speed):
         """Initalize the ball object.
 
-         Parameters
+        Parameters
         ----------
         image: pygame.Surface
             The image of the ball.
@@ -118,7 +118,7 @@ class Platform(MovableEntity):
     def __init__(self, image, rect, speed):
         """Initalize the platform object.
 
-         Parameters
+        Parameters
         ----------
         image: pygame.Surface
             The image of the platform.
@@ -136,6 +136,15 @@ class Platform(MovableEntity):
 
 @dataclass
 class Edges:
+    """Dataclass for containing width and height of edges.
+
+    Attributes
+    ----------
+    width: int
+        Width of top and bottom sides of the edges.
+    height: int
+        Height of left and right sides of the edges.
+    """
     width: int
     height: int
 
@@ -153,14 +162,27 @@ class Level:
         The movable ball object.
     edges: pygame.Rect
         Rectangle that contains width and height of the level
-    is_game_over: bool
-        This variable indicates whether game ended or not.
-    score: int
-        Contains game score value
+    state: GameState
+        Game state of the level.
     """
 
     @dataclass
     class GameState:
+        """Dataclass for containing width and height of edges.
+
+        Attributes
+        ----------
+        ball_proto_rect: pygame.Rect
+            Initial rectangle of the level ball.
+        ball_proto_speed: pygame.Vector2
+            Initial speed of the level ball.
+        score: int
+            Game score of the level.
+        life: int
+            Contains number of player tries (lifes)
+        is_game_over: bool
+            Indicates whether game is ended or not.
+        """
         ball_proto_rect: pygame.Rect
         ball_proto_speed: pygame.Vector2
         score: int = 0
@@ -199,10 +221,17 @@ class Level:
 
 
     def reset_ball(self):
+        """Reset state of the level ball to its initial state."""
         self.ball.rect = copy.deepcopy(self.state.ball_proto_rect)
         self.ball.speed = copy.deepcopy(self.state.ball_proto_speed)
 
     def get_game_state(self):
+        """Return game state of the level.
+
+        Returns
+        -------
+            Level.GameState
+        """
         return self.state
 
     def get_sprites_group(self):
@@ -452,24 +481,65 @@ class LevelMaker:
 
 
 class Label:
-    def __init__(self, font, position: pygame.Vector2, text='', color=(0, 0, 0)):
+    """Class for drawing text strings.
+
+    Attributes
+    ----------
+    font: pygame.font.Font
+        Font of the text.
+    position: pygame.Vector2
+        Position where the text label is placed.
+    text: str
+        Actual text of the label.
+    color: tuple[int, int, int]
+        Color of a text font.
+    text_image: pygame.Surface
+        Rendered image of text label.
+    text_image_rect: pygame.Rect
+        Rectangle with position and width and lenght of rendered image
+        of text label.
+    """
+    def __init__(self, font, position, text='', color=(0, 0, 0)):
+        """Initalize the Label class object.
+
+        Parameters
+        ----------
+        font: pygame.font.Font
+            Font of the text.
+        position: pygame.Vector2
+            Position where the text label is placed.
+        text: str
+            Actual text of the label.
+        color: tuple[int, int, int]
+            Color of a text font.
+        """
         self.font = font
         self.position = position
         self.text = text
         self.color = color
 
+        self.text_image = None
+        self.text_image_rect = None
         self.render()
 
     def get_rendered(self):
+        """Return a rendered image of the text and its rectangle."""
         return (self.text_image, self.text_image_rect)
 
     def set_text(self, text):
+        """Update text of the label and update its rendered image and
+            placementing rectangle.
+        """
         self.text = text
         self.render()
 
     def render(self):
+        """Render an image of the label text and get its placementing
+            rectangle.
+        """
         self.text_image = self.font.render(self.text, True, self.color)
-        self.text_image_rect = self.text_image.get_rect(x=self.position.x, y=self.position.y)
+        self.text_image_rect = \
+            self.text_image.get_rect(x=self.position.x, y=self.position.y)
 
 
 class Game:
@@ -535,10 +605,12 @@ class Game:
         ----------
         screen: Surface
             A `Surface` object (created using ``pygame.display.set_mode()``)
-            which contains the final rendered image that is putted on the screen
-
+            which contains the final rendered image that is putted on
+            the screen.
         sprites_group: pygame.sprite.Group
-            Game objects that needed to be drawn
+            Game objects that needed to be drawn.
+        labels: list[Label]
+            Text label that needed to be drawn.
         """
         # fill the screen with a color to wipe away anything from last frame
         screen.fill('white')
@@ -561,6 +633,8 @@ class Game:
 
         score_count = Label(font, pygame.Vector2(screen.get_width() / 2, 10), 'Score: 0')
         lifes_count = Label(font, pygame.Vector2(screen.get_width() / 4, 10), 'Lifes: ?')
+        game_over_label = Label(font, pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), 'GAME OVER')
+        paused_label = Label(font, pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), 'PAUSE')
 
         # game setup
         running = True
@@ -581,11 +655,19 @@ class Game:
 
             score_count.set_text(f'Score: {level.get_game_state().score}')
             lifes_count.set_text(f'Lifes: {level.get_game_state().lifes}')
+            labels = [score_count, lifes_count]
 
-            self.draw(screen, level.get_sprites_group(), [score_count, lifes_count])
-
-            if not (is_paused or level.get_game_state().is_game_over):
+            # # if not (is_paused or level.get_game_state().is_game_over):
+            # #     level.update()
+            if is_paused:
+                labels.append(paused_label)
+            elif level.get_game_state().is_game_over:
+                labels.append(game_over_label)
+            else:
                 level.update()
+
+            self.draw(screen, level.get_sprites_group(), labels)
+
 
             # if level.get_game_state().is_game_over:
             #     is_paused = True
