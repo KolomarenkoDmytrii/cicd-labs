@@ -483,10 +483,23 @@ class LevelMaker:
         top_margin = ball.rect.height * 3
         y = round(ball.rect.height * 2.2 + top_margin)
 
-        for _ in range(0, self.num_of_rows):
+        rainbow_colors = [
+            (255, 0, 0), # red
+            (255, 200, 0), # yellow
+            (0, 128, 0), # green
+            (0, 0, 255), # blue
+            (128, 0, 200), # violet
+        ]
+        colored_block_images = []
+        for color in rainbow_colors:
+            image = self.images['block'].copy()
+            image.fill(color)
+            colored_block_images.append(image)
+
+        for i in range(0, self.num_of_rows):
             while x + self.images['block'].get_size()[0] < self.edges.width:
                 blocks.append(Block(
-                    image=self.images['block'],
+                    image=colored_block_images[i % len(colored_block_images)],
                     rect=pygame.Rect(
                         (x, y),
                         self.images['block'].get_size()
@@ -640,7 +653,8 @@ class Game:
             which contains the final rendered image that is putted on
             the screen.
         sprites_group: pygame.sprite.Group
-            Game objects that needed to be drawn.
+            Game objects that needed to be drawn. Pass `None` if no sprites
+            needed to be drawn.
         labels: list[Label]
             Text label that needed to be drawn.
         y_of_delimiter: int
@@ -649,7 +663,7 @@ class Game:
         """
         # fill the screen with a color to wipe away anything from last frame
         screen.fill('white')
-        sprites_group.draw(screen)
+        if sprites_group: sprites_group.draw(screen)
 
         for label in labels:
             screen.blit(*label.get_rendered())
@@ -663,16 +677,15 @@ class Game:
         # flip() the display to put work on screen
         pygame.display.flip()
 
-    def draw_menu(self, screen, font, menu_text, start_position):
-        screen.fill('white')
-
+    def render_menu(screen, font, menu_text, start_position):
+        menu_labels = []
         for line in menu_text.splitlines():
-            label = Label(font, start_position, line)
-            screen.blit(*label.get_rendered())
+            menu_labels.append( Label(font, start_position, line) )
+            # screen.blit(*label.get_rendered())
 
-            start_position += (0, label.get_rendered()[1].height)
+            start_position += (0, menu_labels[-1].get_rendered()[1].height)
 
-        pygame.display.flip()
+        return menu_labels
 
     def run(self):
         """Run the game application."""
@@ -711,7 +724,13 @@ class Game:
             "DELETE for reset a game\n" \
             "CTRL for release the ball\n" \
             "A for moving platform to left\n" \
-            "D for moving platform to left"
+            "D for moving platform to right"
+        menu_labels = Game.render_menu(
+            screen,
+            font,
+            menu_text,
+            pygame.Vector2(screen.get_width() / 4, screen.get_height() / 4)
+        )
 
         # game setup
         running = True
@@ -729,9 +748,10 @@ class Game:
                         is_menu_showing = False
                     if event.key == pygame.K_q:
                         running = False
-                    if event.key == pygame.K_DELETE:
+                    if event.key == pygame.K_DELETE: # reset a game
                         level = self.level_maker.get_level()
                         is_paused = False
+                        is_menu_showing = True
                     # if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
                     #     level.release_ball()
 
@@ -739,19 +759,20 @@ class Game:
             lifes_count.set_text(f'Lifes: {level.get_game_state().lifes}')
             labels = [score_count, lifes_count]
 
-            if is_paused:
-                # labels.append(paused_label)
-                pass
-            elif level.get_game_state().is_game_over:
+            # if is_paused:
+            #     # labels.append(paused_label)
+            #     pass
+            if level.get_game_state().is_game_over:
                 labels.append(game_over_label)
             # if all blocks are cleared, player wins
             elif level.get_game_state().is_player_won:
                 labels.append(victory_label)
-            else:
+            elif not is_paused:
                 level.update()
 
             if is_menu_showing or is_paused:
-                self.draw_menu(screen, font, menu_text, pygame.Vector2(screen.get_width() / 4, 10))
+                # self.draw_menu(screen, font, menu_text, pygame.Vector2(screen.get_width() / 4, screen.get_height() / 4))
+                self.draw(screen, None, menu_labels, level.edges.top)
             else:
                 self.draw(screen, level.get_sprites_group(), labels, level.edges.top)
 
