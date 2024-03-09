@@ -189,6 +189,7 @@ class Level:
         lifes: int = 4
         is_game_over: bool = False
         is_ball_released: bool = False
+        is_player_won: bool = False
 
     def __init__(self, lifes, blocks, platform, ball, edges, top_start):
         """Initalize the level object.
@@ -230,8 +231,10 @@ class Level:
         self.state.is_ball_released = False
 
     def release_ball(self):
-        self.state.is_ball_released = True
-        self.ball.speed = copy.deepcopy(self.state.ball_released_speed)
+        if not self.state.is_ball_released:
+            self.state.is_ball_released = True
+            self.ball.speed = copy.deepcopy(self.state.ball_released_speed)
+            print('ball is released')
 
     def get_game_state(self):
         """Return game state of the level.
@@ -299,6 +302,8 @@ class Level:
 
         keys = pygame.key.get_pressed()
 
+        if keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL]:
+            self.release_ball()
         if keys[pygame.K_a]:
             self.platform.speed.x = -abs(self.platform.speed.x)
             update()
@@ -394,6 +399,8 @@ class Level:
 
         if self.state.lifes < 1:
             self.state.is_game_over = True
+        elif len(self.blocks) == 0:
+            self.state.is_player_won = True
 
 
 class LevelMaker:
@@ -543,7 +550,12 @@ class Label:
         self.render()
 
     def get_rendered(self):
-        """Return a rendered image of the text and its rectangle."""
+        """Return a rendered image of the text and its rectangle.
+
+        Returns
+        -------
+            tuple[pygame.Surface, pygame.Rect]
+        """
         return (self.text_image, self.text_image_rect)
 
     def set_text(self, text):
@@ -605,7 +617,7 @@ class Game:
             'block': pygame.Surface( (block_width, 20) )
         }
         self.images['platform'].fill((0, 0, 0))
-        self.images['ball'].fill((0, 0, 0))
+        self.images['ball'].fill((100, 100, 60))
         self.images['block'].fill((0, 0, 0))
 
         self.level_maker = LevelMaker(
@@ -642,9 +654,24 @@ class Game:
         for label in labels:
             screen.blit(*label.get_rendered())
 
-        pygame.draw.line(screen, (0, 0, 0), (0, y_of_delimiter), (self.edges.width, y_of_delimiter))
+        pygame.draw.line(
+            screen,
+            (0, 0, 0),
+            (0, y_of_delimiter), (self.edges.width, y_of_delimiter)
+        )
 
         # flip() the display to put work on screen
+        pygame.display.flip()
+
+    def draw_menu(self, screen, font, menu_text, start_position):
+        screen.fill('white')
+
+        for line in menu_text.splitlines():
+            label = Label(font, start_position, line)
+            screen.blit(*label.get_rendered())
+
+            start_position += (0, label.get_rendered()[1].height)
+
         pygame.display.flip()
 
     def run(self):
@@ -656,16 +683,41 @@ class Game:
         font = pygame.font.SysFont('roboto', 20)
 
         # creating text labels
-        score_count = Label(font, pygame.Vector2(screen.get_width() / 2, 10), 'Score: 0')
-        lifes_count = Label(font, pygame.Vector2(screen.get_width() / 4, 10), 'Lifes: ?')
-        game_over_label = Label(font, pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), 'GAME OVER')
-        victory_label = Label(font, pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), 'YOU WIN!')
-        paused_label = Label(font, pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), 'PAUSE')
+        score_count = Label(
+            font, pygame.Vector2(screen.get_width() / 1.5, 10), 'Score: 0'
+        )
+        lifes_count = Label(
+            font, pygame.Vector2(screen.get_width() / 4, 10), 'Lifes: ?'
+        )
+        game_over_label = Label(
+            font,
+            pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
+            'GAME OVER'
+        )
+        victory_label = Label(
+            font,
+            pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
+            'YOU WIN!'
+        )
+        paused_label = Label(
+            font,
+            pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
+            'PAUSE'
+        )
+
+        menu_text = \
+            "Press SPACE to start game or for resume / pause game\n" \
+            "Q for exit\n" \
+            "DELETE for reset a game\n" \
+            "CTRL for release the ball\n" \
+            "A for moving platform to left\n" \
+            "D for moving platform to left"
 
         # game setup
         running = True
         is_paused = False
         level = self.level_maker.get_level()
+        is_menu_showing = True
 
         while running:
             for event in pygame.event.get():
@@ -674,33 +726,34 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         is_paused = not is_paused
+                        is_menu_showing = False
                     if event.key == pygame.K_q:
                         running = False
-                    if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
-                        level.release_ball()
-                        print('ball is released')
+                    if event.key == pygame.K_DELETE:
+                        level = self.level_maker.get_level()
+                        is_paused = False
+                    # if event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
+                    #     level.release_ball()
 
             score_count.set_text(f'Score: {level.get_game_state().score}')
             lifes_count.set_text(f'Lifes: {level.get_game_state().lifes}')
             labels = [score_count, lifes_count]
 
-            # # if not (is_paused or level.get_game_state().is_game_over):
-            # #     level.update()
             if is_paused:
-                labels.append(paused_label)
+                # labels.append(paused_label)
+                pass
             elif level.get_game_state().is_game_over:
                 labels.append(game_over_label)
             # if all blocks are cleared, player wins
-            elif len(level.blocks) == 0:
+            elif level.get_game_state().is_player_won:
                 labels.append(victory_label)
             else:
                 level.update()
 
-            self.draw(screen, level.get_sprites_group(), labels, level.edges.top)
-
-
-            # if level.get_game_state().is_game_over:
-            #     is_paused = True
+            if is_menu_showing or is_paused:
+                self.draw_menu(screen, font, menu_text, pygame.Vector2(screen.get_width() / 4, 10))
+            else:
+                self.draw(screen, level.get_sprites_group(), labels, level.edges.top)
 
             # limits FPS to 60
             clock.tick(60)
