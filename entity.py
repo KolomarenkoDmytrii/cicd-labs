@@ -77,15 +77,20 @@ class Block(Entity):
 
     def __init__(self, image, rect):
         Entity.__init__(self, image, rect)
-        self.is_destroyed = False
+        self.__is_destroyed = False
 
     def is_destroyed(self):
-        """Return whether the block is destroyed or not."""
-        return self.is_destroyed
+        """Return whether the block is destroyed or not.
+
+        Returns
+        -------
+        bool
+        """
+        return self.__is_destroyed
 
     def set_is_destroyed(self):
         """Mark the block destroyed."""
-        self.is_destroyed = True
+        self.__is_destroyed = True
 
 
 class Ball(MovableEntity):

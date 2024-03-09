@@ -21,17 +21,17 @@ class Label:
 
     Attributes
     ----------
-    font: pygame.font.Font
+    __font: pygame.font.Font
         Font of the text.
-    position: pygame.Vector2
+    __position: pygame.Vector2
         Position where the text label is placed.
-    text: str
+    __text: str
         Actual text of the label.
-    color: tuple[int, int, int]
+    __color: tuple[int, int, int]
         Color of a text font.
-    text_image: pygame.Surface
+    __text_image: pygame.Surface
         Rendered image of text label.
-    text_image_rect: pygame.Rect
+    __text_image_rect: pygame.Rect
         Rectangle with position and width and lenght of rendered image
         of text label.
     """
@@ -49,35 +49,35 @@ class Label:
         color: tuple[int, int, int]
             Color of a text font.
         """
-        self.font = font
-        self.position = position
-        self.text = text
+        self.__font = font
+        self.__position = position
+        self.__text = text
         self.color = color
 
-        self.text_image = None
-        self.text_image_rect = None
-        self.render()
+        self.__text_image = None
+        self.__text_image_rect = None
+        self.__render()
 
     def get_rendered(self):
         """Return a rendered image of the text and its rectangle.
 
         Returns
         -------
-            tuple[pygame.Surface, pygame.Rect]
+        tuple[pygame.Surface, pygame.Rect]
         """
-        return (self.text_image, self.text_image_rect)
+        return (self.__text_image, self.__text_image_rect)
 
     def set_text(self, text):
         """Update text of the label and update its rendered image and
             placementing rectangle.
         """
-        self.text = text
-        self.render()
+        self.__text = text
+        self.__render()
 
-    def render(self):
+    def __render(self):
         """Render an image of the label text and get its placementing
             rectangle.
         """
-        self.text_image = self.font.render(self.text, True, self.color)
-        self.text_image_rect = \
-            self.text_image.get_rect(x=self.position.x, y=self.position.y)
+        self.__text_image = self.__font.render(self.__text, True, self.color)
+        self.__text_image_rect = \
+            self.__text_image.get_rect(x=self.__position.x, y=self.__position.y)
