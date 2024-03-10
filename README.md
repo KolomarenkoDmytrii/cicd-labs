@@ -19,7 +19,7 @@ For avaible command line argumets run `python main.py -h`.
 - `entity.py`: module for game objects.
 - `helpers.py`: various helpers for other modules.
 - `assets_sources.txt`: information about where assets file were gotten.
-- `assets`: ddd
+- `assets`: folder with used assets files.
     + `ball.png`: image of the ball.
     + `platform.png`: image of the platform.
     + `block.png`: image of destroyable blocks.
