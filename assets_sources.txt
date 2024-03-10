@@ -4,4 +4,4 @@ Ball image: https://openclipart.org/detail/50665/croquet-ball
 
 Platform image: https://openclipart.org/detail/24559/simple-space-platform-game-stuff
 
-Block image: https://openclipart.org/detail/139825/glass-block
+Block image: https://openclipart.org/detail/21189/glossy-rectangle

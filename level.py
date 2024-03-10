@@ -29,7 +29,7 @@ class Level:
 
         Attributes
         ----------
-        ball_released_speed: pygame.Vector2
+        ball_released_speed: pygame.math.Vector2
             Initial speed of the level ball.
         score: int
             Game score of the level.
@@ -38,7 +38,7 @@ class Level:
         is_game_over: bool
             Indicates whether game is ended or not.
         """
-        ball_released_speed: pygame.Vector2
+        ball_released_speed: pygame.math.Vector2
         score: int = 0
         lifes: int = 4
         is_game_over: bool = False
@@ -88,7 +88,7 @@ class Level:
         """Reset state of the level ball to its initial state."""
         self.__ball.rect.bottom = self.__platform.rect.top
         self.__ball.rect.centerx = self.__platform.rect.centerx
-        self.__ball.speed = pygame.Vector2(0, 0)
+        self.__ball.speed = pygame.math.Vector2(0, 0)
         self.__state.is_ball_released = False
 
     def release_ball(self):
@@ -317,7 +317,7 @@ class LevelMaker:
                 (self.__edges.width / 2, self.__edges.height * 0.75),
                 self.__images['platform'].get_size()
             ),
-            speed=pygame.Vector2(5, 0)
+            speed=pygame.math.Vector2(5, 0)
         )
         ball = entity.Ball(
             image=self.__images['ball'],
@@ -325,7 +325,7 @@ class LevelMaker:
                 (0, 0),
                 self.__images['ball'].get_size()
             ),
-            speed=pygame.Vector2(
+            speed=pygame.math.Vector2(
                 round(self.__edges.height * 0.005),
                 -round(self.__edges.height * 0.005)
             )

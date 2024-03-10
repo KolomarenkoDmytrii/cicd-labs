@@ -23,7 +23,7 @@ class Label:
     ----------
     __font: pygame.font.Font
         Font of the text.
-    __position: pygame.Vector2
+    __position: pygame.math.Vector2
         Position where the text label is placed.
     __text: str
         Actual text of the label.
@@ -42,7 +42,7 @@ class Label:
         ----------
         font: pygame.font.Font
             Font of the text.
-        position: pygame.Vector2
+        position: pygame.math.Vector2
             Position where the text label is placed.
         text: str
             Actual text of the label.

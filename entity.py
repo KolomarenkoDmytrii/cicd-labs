@@ -48,7 +48,7 @@ class MovableEntity(Entity):
 
     Attributes
     ----------
-    speed: pygame.Vector2
+    speed: pygame.math.Vector2
         The speed vector of the entity
     """
 
@@ -61,7 +61,7 @@ class MovableEntity(Entity):
             The image of the entity.
         rect: pygame.Rect
             The rectangle that contains position and borders of the entity.
-        speed: pygame.Vector2
+        speed: pygame.math.Vector2
             The speed vector of the entity.
         """
         Entity.__init__(self, image, rect)
@@ -105,7 +105,7 @@ class Ball(MovableEntity):
             The image of the ball.
         rect: pygame.Rect
             The rectangle that contains position and borders of the ball.
-        speed: pygame.Vector2
+        speed: pygame.math.Vector2
             The speed vector of the ball.
         """
         MovableEntity.__init__(self, image, rect, speed)
@@ -126,7 +126,7 @@ class Platform(MovableEntity):
             The image of the platform.
         rect: pygame.Rect
             The rectangle that contains position and borders of the platform.
-        speed: pygame.Vector2
+        speed: pygame.math.Vector2
             The speed vector of the platform.
         """
         MovableEntity.__init__(self, image, rect, speed)

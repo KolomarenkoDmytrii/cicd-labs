@@ -20,9 +20,14 @@ class Game:
     __screen: pygame.Surface
         Contains the final rendered image that is putted on
         the screen.
+    __background_color: tuple[int, int, int]
+            Color of the background.
+    __accent_color: tuple[int, int, int]
+        Color of font, lines etc. It is opposite to backround color thus is it
+        equals to "(255, 255, 255) - `background_color`"
     """
 
-    def __init__(self, edges, num_of_columns, num_of_rows):
+    def __init__(self, edges, num_of_columns, num_of_rows, background_color=(0, 0, 0)):
         """Initalize the game application object.
 
         Parameters
@@ -33,6 +38,10 @@ class Game:
             Number of columns of blocks.
         num_of_rows: int
             Number of rows of blocks.
+        background_color: tuple[int, int, int]
+            Color of the background. Accent color (color of font, lines etc) is
+            opposite to backround color thus is it equals to
+            "(255, 255, 255) - `background_color`"
         """
         pygame.init()
 
@@ -40,6 +49,12 @@ class Game:
 
         self.__screen = \
             pygame.display.set_mode((self.__edges.width, self.__edges.height))
+
+        self.__background_color = background_color
+        self.__accent_color = tuple(
+            pygame.math.Vector3(255, 255, 255) - \
+                pygame.math.Vector3(self.__background_color)
+        )
 
         horizontal_alignment = round(self.__edges.width * 0.03)
 
@@ -55,17 +70,17 @@ class Game:
 
         ball_image = pygame.image.load(
             os.path.join(os.getcwd(), 'assets', 'ball.png')
-        ).convert(self.__screen)
+        ).convert_alpha(self.__screen)
         ball_image = pygame.transform.scale(ball_image, (ball_size, ball_size))
 
         platform_image = pygame.image.load(
             os.path.join(os.getcwd(), 'assets', 'platform.png')
-        ).convert(self.__screen)
+        ).convert_alpha(self.__screen)
         platform_image = pygame.transform.scale(platform_image, (round(self.__edges.width * 0.092), ball_size))
 
         block_image = pygame.image.load(
             os.path.join(os.getcwd(), 'assets', 'block.png')
-        ).convert(self.__screen)
+        ).convert_alpha(self.__screen)
         block_image = pygame.transform.scale(block_image, (block_width, block_width * 0.45))
 
         self.__images = {
@@ -103,8 +118,7 @@ class Game:
             game counters.
         """
         # fill the screen with a color to wipe away anything from last frame
-        # self.__screen.fill('white')
-        self.__screen.fill('black')
+        self.__screen.fill(self.__background_color)
         if sprites_group: sprites_group.draw(self.__screen)
 
         for label in labels:
@@ -112,15 +126,14 @@ class Game:
 
         pygame.draw.line(
             self.__screen,
-            # (0, 0, 0),
-            (255, 255, 255),
+            self.__accent_color,
             (0, y_of_delimiter), (self.__edges.width, y_of_delimiter)
         )
 
         # flip() the display to put work on screen
         pygame.display.flip()
 
-    def __render_menu(screen, font, menu_text, start_position):
+    def __render_menu(screen, font, color, menu_text, start_position):
         """Renders text label of the start / pause game menu text.
 
         Returns
@@ -129,44 +142,37 @@ class Game:
         """
         menu_labels = []
         for line in menu_text.splitlines():
-            menu_labels.append(helpers.Label(font, start_position, line, (255, 255, 255)))
+            menu_labels.append(
+                helpers.Label(font, start_position, line, color)
+            )
             start_position += (0, menu_labels[-1].get_rendered()[1].height)
 
         return menu_labels
 
     def run(self):
         """Run the game application."""
-        # pygame setup
-        # pygame.init()
-        # screen = pygame.display.set_mode((self.__edges.width, self.__edges.height))
         clock = pygame.time.Clock()
 
         # creating text labels
-        text_color = (255, 255, 255)
+        text_color = self.__accent_color
         score_count = helpers.Label(
-            self.__font, pygame.Vector2(self.__screen.get_width() / 1.5, 10), 'Score: 0', text_color
+            self.__font, pygame.math.Vector2(self.__screen.get_width() / 1.5, 10), 'Score: 0', text_color
         )
         lifes_count = helpers.Label(
-            self.__font, pygame.Vector2(self.__screen.get_width() / 4, 10), 'Lifes: ?', text_color
+            self.__font, pygame.math.Vector2(self.__screen.get_width() / 4, 10), 'Lifes: ?', text_color
         )
         game_over_label = helpers.Label(
             self.__font,
-            pygame.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
+            pygame.math.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
             'GAME OVER',
             text_color
         )
         victory_label = helpers.Label(
             self.__font,
-            pygame.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
+            pygame.math.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
             'YOU WIN!',
             text_color
         )
-        # paused_label = helpers.Label(
-        #     font=self.__font,
-        #     position=pygame.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
-        #     text='PAUSE',
-        #     color=(0, 0, 0)
-        # )
 
         menu_text = \
             "Press SPACE to start the game or for resume / pause the game\n" \
@@ -178,8 +184,9 @@ class Game:
         menu_labels = Game.__render_menu(
             self.__screen,
             self.__font,
+            self.__accent_color,
             menu_text,
-            pygame.Vector2(self.__screen.get_width() / 6, self.__screen.get_height() / 4)
+            pygame.math.Vector2(self.__screen.get_width() / 6, self.__screen.get_height() / 4)
         )
 
         # game setup
@@ -218,7 +225,6 @@ class Game:
             if is_menu_showing or is_paused:
                 self.__draw(None, menu_labels, level.get_top_edge())
             else:
-                # self.__draw(screen, level.get_sprites_group(), labels, level.get_top_edge())
                 self.__draw(level.get_sprites_group(), labels, level.get_top_edge())
 
             # limit FPS to 60
