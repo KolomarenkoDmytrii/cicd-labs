@@ -117,7 +117,6 @@ class Game:
             Says where on Y axis draw the line that delimiters game area and
             game counters.
         """
-        # fill the screen with a color to wipe away anything from last frame
         self.__screen.fill(self.__background_color)
         if sprites_group: sprites_group.draw(self.__screen)
 
