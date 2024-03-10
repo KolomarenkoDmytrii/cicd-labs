@@ -1,3 +1,5 @@
+"""Create game objects."""
+
 import pygame
 
 
@@ -22,6 +24,7 @@ class Entity(pygame.sprite.Sprite):
         rect: pygame.Rect
             The rectangle that contains position and borders of the entity.
         """
+
         pygame.sprite.Sprite.__init__(self)
         self.image = image
         self.rect = rect
@@ -40,6 +43,7 @@ class Entity(pygame.sprite.Sprite):
             If there is collision between `self` and `other`,
             `True` will be returned. Otherwise `False` will be returned.
         """
+
         return pygame.sprite.collide_rect(self, other)
 
 
@@ -64,11 +68,13 @@ class MovableEntity(Entity):
         speed: pygame.math.Vector2
             The speed vector of the entity.
         """
+
         Entity.__init__(self, image, rect)
         self.speed = speed
 
     def move(self):
         """Move the entity."""
+
         self.rect.move_ip(self.speed.x, self.speed.y)
 
 
@@ -86,10 +92,12 @@ class Block(Entity):
         -------
         bool
         """
+
         return self.__is_destroyed
 
     def set_is_destroyed(self):
         """Mark the block destroyed."""
+
         self.__is_destroyed = True
 
 
@@ -108,6 +116,7 @@ class Ball(MovableEntity):
         speed: pygame.math.Vector2
             The speed vector of the ball.
         """
+
         MovableEntity.__init__(self, image, rect, speed)
 
 
@@ -129,8 +138,10 @@ class Platform(MovableEntity):
         speed: pygame.math.Vector2
             The speed vector of the platform.
         """
+
         MovableEntity.__init__(self, image, rect, speed)
 
     def move(self):
         """Move platform to left or right"""
+
         self.rect.move_ip(self.speed.x, 0)

@@ -1,3 +1,5 @@
+"""Create and manage level."""
+
 from dataclasses import dataclass
 import copy
 import pygame
@@ -38,6 +40,7 @@ class Level:
         is_game_over: bool
             Indicates whether game is ended or not.
         """
+
         ball_released_speed: pygame.math.Vector2
         score: int = 0
         lifes: int = 4
@@ -62,6 +65,7 @@ class Level:
             Says where the top of game area lays. It is needed for delimeting
             game and counters areas.
         """
+
         self.__blocks = blocks
         self.__platform = platform
         self.__ball = ball
@@ -82,10 +86,12 @@ class Level:
         ------
         int
         """
+
         return self.__edges.top
 
     def __reset_ball(self):
         """Reset state of the level ball to its initial state."""
+
         self.__ball.rect.bottom = self.__platform.rect.top
         self.__ball.rect.centerx = self.__platform.rect.centerx
         self.__ball.speed = pygame.math.Vector2(0, 0)
@@ -93,6 +99,7 @@ class Level:
 
     def release_ball(self):
         """Release the ball from the platform."""
+
         if not self.__state.is_ball_released:
             self.__state.is_ball_released = True
             self.__ball.speed = copy.deepcopy(self.__state.ball_released_speed)
@@ -104,6 +111,7 @@ class Level:
         -------
         Level.GameState
         """
+
         return self.__state
 
     def get_sprites_group(self):
@@ -113,6 +121,7 @@ class Level:
         -------
         pygame.sprite.Group
         """
+
         return pygame.sprite.Group(self.__platform, self.__ball, *self.__blocks)
 
     def __adjust_on_x_collision(movable_entity_1, entity_2):
@@ -126,6 +135,7 @@ class Level:
         entity_2: entity.Entity
             Another entity that can be movable or not.
         """
+
         # if movable_entity_1 collides with entity_2's left side
         if movable_entity_1.rect.right > entity_2.rect.left and \
             movable_entity_1.rect.right < entity_2.rect.right:
@@ -241,7 +251,8 @@ class Level:
 
 
     def update(self):
-        """Do updates of the level's state and objects"""
+        """Do updates of the level's state and objects."""
+
         self.__process_key_presses()
         self.__process_collisions()
 
@@ -298,6 +309,7 @@ class LevelMaker:
                 - 'vertical_alignment': vertical alignment between blocks;
                 - 'num_of_rows': number of rows of blocks.
         """
+
         self.__edges = edges
         self.__images = images
         self.__horizontal_alignment = blocks_layout['horizontal_alignment']
@@ -311,6 +323,7 @@ class LevelMaker:
         -------
         level.Level
         """
+
         platform = entity.Platform(
             image=self.__images['platform'],
             rect=pygame.Rect(

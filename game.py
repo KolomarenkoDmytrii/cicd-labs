@@ -1,3 +1,5 @@
+"""Main game routine."""
+
 import os
 import pygame
 import helpers
@@ -43,6 +45,7 @@ class Game:
             opposite to backround color thus is it equals to
             "(255, 255, 255) - `background_color`"
         """
+
         pygame.init()
 
         self.__edges = edges
@@ -117,6 +120,7 @@ class Game:
             Says where on Y axis draw the line that delimiters game area and
             game counters.
         """
+
         self.__screen.fill(self.__background_color)
         if sprites_group: sprites_group.draw(self.__screen)
 
@@ -139,6 +143,7 @@ class Game:
         -------
         list[helpers.Label]
         """
+
         menu_labels = []
         for line in menu_text.splitlines():
             menu_labels.append(
@@ -150,6 +155,7 @@ class Game:
 
     def run(self):
         """Run the game application."""
+
         clock = pygame.time.Clock()
 
         # creating text labels

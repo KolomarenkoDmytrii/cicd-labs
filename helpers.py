@@ -1,3 +1,5 @@
+"""Various helpers for other modules."""
+
 import pygame
 from dataclasses import dataclass
 
@@ -12,6 +14,7 @@ class Edges:
     height: int
         Height of left and right sides of the edges.
     """
+
     width: int
     height: int
 
@@ -35,6 +38,7 @@ class Label:
         Rectangle with position and width and lenght of rendered image
         of text label.
     """
+
     def __init__(self, font, position, text='', color=(0, 0, 0)):
         """Initalize the Label class object.
 
@@ -49,6 +53,7 @@ class Label:
         color: tuple[int, int, int]
             Color of a text font.
         """
+
         self.__font = font
         self.__position = position
         self.__text = text
@@ -65,12 +70,14 @@ class Label:
         -------
         tuple[pygame.Surface, pygame.Rect]
         """
+
         return (self.__text_image, self.__text_image_rect)
 
     def set_text(self, text):
         """Update text of the label and update its rendered image and
             placementing rectangle.
         """
+
         self.__text = text
         self.__render()
 
@@ -78,6 +85,7 @@ class Label:
         """Render an image of the label text and get its placementing
             rectangle.
         """
+
         self.__text_image = self.__font.render(self.__text, True, self.color)
         self.__text_image_rect = \
             self.__text_image.get_rect(x=self.__position.x, y=self.__position.y)
