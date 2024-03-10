@@ -1,0 +1,5 @@
+Font: https://fonts.google.com/specimen/Roboto
+
+Ball image: https://openclipart.org/image/400px/50665
+
+Platform image: https://openclipart.org/image/2000px/24559

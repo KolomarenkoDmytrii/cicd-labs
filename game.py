@@ -1,3 +1,4 @@
+import os
 import pygame
 import helpers
 import level
@@ -28,32 +29,57 @@ class Game:
         num_of_rows: int
             Number of rows of blocks.
         """
+        pygame.init()
+
         self.__edges = edges
 
-        horizontal_margin = round(self.__edges.width * 0.03)
+        horizontal_alignment = round(self.__edges.width * 0.03)
 
+        # Because blocks placementing is as follows:
+        # alignment block alignment block ... block alignment,
+        # formula for calculating block width is as follows
         block_width = round(
-            (self.__edges.width - horizontal_margin * 2 - horizontal_margin * num_of_columns) /
+            (self.__edges.width - horizontal_alignment * 2 - horizontal_alignment * num_of_columns) /
                 num_of_columns
         )
+        ball_size = round(self.__edges.height * 0.03)
 
+        ball_image = pygame.image.load(
+            os.path.join(os.getcwd(), 'assets', 'ball.png')
+        )#.convert()
+        ball_image = pygame.transform.scale(ball_image, (ball_size, ball_size))
+
+        platform_image = pygame.image.load(
+            os.path.join(os.getcwd(), 'assets', 'platform.png')
+        )#.convert()
+        platform_image = pygame.transform.scale(platform_image, (round(self.__edges.width * 0.092), ball_size))
+
+        # self.__images = {
+        #     'platform': pygame.Surface( (round(self.__edges.width * 0.092), ball_size) ),
+        #     'ball': pygame.Surface((ball_size, ball_size)),
+        #     'block': pygame.Surface( (block_width, block_width * 0.45) )
+        # }
         self.__images = {
-            'platform': pygame.Surface((65, 20)),
-            'ball': pygame.Surface((15, 15)),
-            'block': pygame.Surface( (block_width, 20) )
+            'platform': platform_image,
+            'ball': ball_image,
+            'block': pygame.Surface( (block_width, block_width * 0.45) )
         }
-        self.__images['platform'].fill((0, 0, 0))
-        self.__images['ball'].fill((100, 100, 60))
+        # self.__images['platform'].fill((0, 0, 0))
+        # self.__images['ball'].fill((100, 100, 60))
         self.__images['block'].fill((0, 0, 0))
 
         self.__level_maker = level.LevelMaker(
             edges=self.__edges,
             images=self.__images,
             blocks_layout={
-                'horizontal_margin': horizontal_margin,
-                'vertical_margin': round(self.__edges.height * 0.06),
+                'horizontal_alignment': horizontal_alignment,
+                'vertical_alignment': round(self.__edges.height * 0.06),
                 'num_of_rows': num_of_rows
             }
+        )
+
+        self.__font = pygame.font.Font(
+            os.path.join(os.getcwd(), 'assets', 'font.ttf'), 20
         )
 
     def __draw(self, screen, sprites_group, labels, y_of_delimiter):
@@ -107,30 +133,29 @@ class Game:
     def run(self):
         """Run the game application."""
         # pygame setup
-        pygame.init()
+        # pygame.init()
         screen = pygame.display.set_mode((self.__edges.width, self.__edges.height))
         clock = pygame.time.Clock()
-        font = pygame.font.SysFont('roboto', 20)
 
         # creating text labels
         score_count = helpers.Label(
-            font, pygame.Vector2(screen.get_width() / 1.5, 10), 'Score: 0'
+            self.__font, pygame.Vector2(screen.get_width() / 1.5, 10), 'Score: 0'
         )
         lifes_count = helpers.Label(
-            font, pygame.Vector2(screen.get_width() / 4, 10), 'Lifes: ?'
+            self.__font, pygame.Vector2(screen.get_width() / 4, 10), 'Lifes: ?'
         )
         game_over_label = helpers.Label(
-            font,
+            self.__font,
             pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
             'GAME OVER'
         )
         victory_label = helpers.Label(
-            font,
+            self.__font,
             pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
             'YOU WIN!'
         )
         paused_label = helpers.Label(
-            font,
+            self.__font,
             pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
             'PAUSE'
         )
@@ -144,7 +169,7 @@ class Game:
             "D for moving platform to right"
         menu_labels = Game.__render_menu(
             screen,
-            font,
+            self.__font,
             menu_text,
             pygame.Vector2(screen.get_width() / 6, screen.get_height() / 4)
         )

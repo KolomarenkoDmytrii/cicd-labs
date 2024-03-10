@@ -29,8 +29,6 @@ class Level:
 
         Attributes
         ----------
-        ball_proto_rect: pygame.Rect
-            Initial rectangle of the level ball.
         ball_released_speed: pygame.Vector2
             Initial speed of the level ball.
         score: int
@@ -88,7 +86,6 @@ class Level:
 
     def __reset_ball(self):
         """Reset state of the level ball to its initial state."""
-        # self.__ball.rect = copy.deepcopy(self.__state.ball_proto_rect)
         self.__ball.rect.bottom = self.__platform.rect.top
         self.__ball.rect.centerx = self.__platform.rect.centerx
         self.__ball.speed = pygame.Vector2(0, 0)
@@ -266,20 +263,18 @@ class LevelMaker:
 
     Attributes
     ----------
-    __edges: tuple[int, int]
-        Tuple that contains width and height of the level in this format:
-        (width: int, height: int)
+    __edges: helpers.Edges
+        Contains width and height of the level.
     __images: dict[str, pygame.Surface]
-        Dictionary that contains level's objects images in this format:
-        'object type name, `str`' : 'image, `pygame.Surface`'
+        Dictionary that contains level's objects images.
         Object types name can be:
             - 'platform' for entity.Platform object;
             - 'ball' for entity.Ball object;
             - 'block' for entity.Block objects.
-    __horizontal_margin: int
-        Horizontal margin between blocks.
-    __vertical_margin: int
-        Vertical margin between blocks.
+    __horizontal_alignment: int
+        Horizontal alignment between blocks.
+    __vertical_alignment: int
+        Vertical alignment between blocks.
     __num_of_rows:
         Number of rows of blocks.
     """
@@ -289,26 +284,24 @@ class LevelMaker:
 
         Parameters
         ----------
-        edges: tuple[int, int]
-            Tuple that contains width and height of the level in this format:
-            (width: int, height: int)
+        edges: helpers.Edges
+            Contains width and height of the level.
         images: dict[str, pygame.Surface]
-            Dictionary that contains level's objects images in this format:
-            'object type name, `str`' : 'image, `pygame.Surface`'
+           Dictionary that contains level's objects images.
             Object types name can be:
-                - 'platform' for entity.Platform object;
-                - 'ball' for entity.Ball object;
-                - 'block' for entity.Block objects.
+            - 'platform' for entity.Platform object;
+            - 'ball' for entity.Ball object;
+            - 'block' for entity.Block objects.
         blocks_layout: dict[str, int]
             Dictionary that contains blocks layout. Dictionary keys are follows:
-                - 'horizontal_margin': horizontal margin between blocks;
-                - 'vertical_margin': vertical margin between blocks;
+                - 'horizontal_alignment': horizontal alignment between blocks;
+                - 'vertical_alignment': vertical alignment between blocks;
                 - 'num_of_rows': number of rows of blocks.
         """
         self.__edges = edges
         self.__images = images
-        self.__horizontal_margin = blocks_layout['horizontal_margin']
-        self.__vertical_margin = blocks_layout['vertical_margin']
+        self.__horizontal_alignment = blocks_layout['horizontal_alignment']
+        self.__vertical_alignment = blocks_layout['vertical_alignment']
         self.__num_of_rows = blocks_layout['num_of_rows']
 
     def get_level(self):
@@ -339,9 +332,9 @@ class LevelMaker:
         )
 
         # placing blocks
-        x = self.__horizontal_margin
-        top_margin = ball.rect.height * 3
-        y = round(ball.rect.height * 2.2 + top_margin)
+        x = self.__horizontal_alignment
+        top_alignment = ball.rect.height * 3
+        y = round(ball.rect.height * 2.2 + top_alignment)
 
         rainbow_colors = [
             (255, 0, 0), # red
@@ -367,11 +360,11 @@ class LevelMaker:
                         self.__images['block'].get_size()
                     )
                 ))
-                x += self.__images['block'].get_size()[0] + self.__horizontal_margin
+                x += self.__images['block'].get_size()[0] + self.__horizontal_alignment
 
             # go to the next row
-            x = self.__horizontal_margin
-            y += self.__vertical_margin
+            x = self.__horizontal_alignment
+            y += self.__vertical_alignment
 
         return Level(
             lifes=4,
@@ -379,5 +372,5 @@ class LevelMaker:
             platform=platform,
             ball=ball,
             edges=self.__edges,
-            top_start=top_margin
+            top_start=top_alignment
         )
