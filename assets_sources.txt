@@ -1,5 +1,7 @@
 Font: https://fonts.google.com/specimen/Roboto
 
-Ball image: https://openclipart.org/image/400px/50665
+Ball image: https://openclipart.org/detail/50665/croquet-ball
 
-Platform image: https://openclipart.org/image/2000px/24559
+Platform image: https://openclipart.org/detail/24559/simple-space-platform-game-stuff
+
+Block image: https://openclipart.org/detail/139825/glass-block

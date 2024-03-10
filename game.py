@@ -15,6 +15,11 @@ class Game:
         Dictionary that contains level's objects images.
     __level_maker: level.LevelMaker
         The level.LevelMaker object that do initializing of the level
+    __font: pygame.font.Font
+        Font which used for rendering text.
+    __screen: pygame.Surface
+        Contains the final rendered image that is putted on
+        the screen.
     """
 
     def __init__(self, edges, num_of_columns, num_of_rows):
@@ -33,9 +38,13 @@ class Game:
 
         self.__edges = edges
 
+        self.__screen = \
+            pygame.display.set_mode((self.__edges.width, self.__edges.height))
+
         horizontal_alignment = round(self.__edges.width * 0.03)
 
-        # Because blocks placementing is as follows:
+        # make game objects images
+        #   Because blocks placementing is as follows:
         # alignment block alignment block ... block alignment,
         # formula for calculating block width is as follows
         block_width = round(
@@ -46,27 +55,24 @@ class Game:
 
         ball_image = pygame.image.load(
             os.path.join(os.getcwd(), 'assets', 'ball.png')
-        )#.convert()
+        ).convert(self.__screen)
         ball_image = pygame.transform.scale(ball_image, (ball_size, ball_size))
 
         platform_image = pygame.image.load(
             os.path.join(os.getcwd(), 'assets', 'platform.png')
-        )#.convert()
+        ).convert(self.__screen)
         platform_image = pygame.transform.scale(platform_image, (round(self.__edges.width * 0.092), ball_size))
 
-        # self.__images = {
-        #     'platform': pygame.Surface( (round(self.__edges.width * 0.092), ball_size) ),
-        #     'ball': pygame.Surface((ball_size, ball_size)),
-        #     'block': pygame.Surface( (block_width, block_width * 0.45) )
-        # }
+        block_image = pygame.image.load(
+            os.path.join(os.getcwd(), 'assets', 'block.png')
+        ).convert(self.__screen)
+        block_image = pygame.transform.scale(block_image, (block_width, block_width * 0.45))
+
         self.__images = {
             'platform': platform_image,
             'ball': ball_image,
-            'block': pygame.Surface( (block_width, block_width * 0.45) )
+            'block': block_image
         }
-        # self.__images['platform'].fill((0, 0, 0))
-        # self.__images['ball'].fill((100, 100, 60))
-        self.__images['block'].fill((0, 0, 0))
 
         self.__level_maker = level.LevelMaker(
             edges=self.__edges,
@@ -82,15 +88,11 @@ class Game:
             os.path.join(os.getcwd(), 'assets', 'font.ttf'), 20
         )
 
-    def __draw(self, screen, sprites_group, labels, y_of_delimiter):
+    def __draw(self, sprites_group, labels, y_of_delimiter):
         """Update the image of the game.
 
         Parameters
         ----------
-        screen: pygame.Surface
-            A `Surface` object (created using ``pygame.display.set_mode()``)
-            which contains the final rendered image that is putted on
-            the screen.
         sprites_group: pygame.sprite.Group
             Game objects that needed to be drawn. Pass `None` if no sprites
             needed to be drawn.
@@ -101,15 +103,17 @@ class Game:
             game counters.
         """
         # fill the screen with a color to wipe away anything from last frame
-        screen.fill('white')
-        if sprites_group: sprites_group.draw(screen)
+        # self.__screen.fill('white')
+        self.__screen.fill('black')
+        if sprites_group: sprites_group.draw(self.__screen)
 
         for label in labels:
-            screen.blit(*label.get_rendered())
+            self.__screen.blit(*label.get_rendered())
 
         pygame.draw.line(
-            screen,
-            (0, 0, 0),
+            self.__screen,
+            # (0, 0, 0),
+            (255, 255, 255),
             (0, y_of_delimiter), (self.__edges.width, y_of_delimiter)
         )
 
@@ -125,7 +129,7 @@ class Game:
         """
         menu_labels = []
         for line in menu_text.splitlines():
-            menu_labels.append(helpers.Label(font, start_position, line))
+            menu_labels.append(helpers.Label(font, start_position, line, (255, 255, 255)))
             start_position += (0, menu_labels[-1].get_rendered()[1].height)
 
         return menu_labels
@@ -134,31 +138,35 @@ class Game:
         """Run the game application."""
         # pygame setup
         # pygame.init()
-        screen = pygame.display.set_mode((self.__edges.width, self.__edges.height))
+        # screen = pygame.display.set_mode((self.__edges.width, self.__edges.height))
         clock = pygame.time.Clock()
 
         # creating text labels
+        text_color = (255, 255, 255)
         score_count = helpers.Label(
-            self.__font, pygame.Vector2(screen.get_width() / 1.5, 10), 'Score: 0'
+            self.__font, pygame.Vector2(self.__screen.get_width() / 1.5, 10), 'Score: 0', text_color
         )
         lifes_count = helpers.Label(
-            self.__font, pygame.Vector2(screen.get_width() / 4, 10), 'Lifes: ?'
+            self.__font, pygame.Vector2(self.__screen.get_width() / 4, 10), 'Lifes: ?', text_color
         )
         game_over_label = helpers.Label(
             self.__font,
-            pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
-            'GAME OVER'
+            pygame.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
+            'GAME OVER',
+            text_color
         )
         victory_label = helpers.Label(
             self.__font,
-            pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
-            'YOU WIN!'
+            pygame.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
+            'YOU WIN!',
+            text_color
         )
-        paused_label = helpers.Label(
-            self.__font,
-            pygame.Vector2(screen.get_width() * 0.45, screen.get_height() / 2),
-            'PAUSE'
-        )
+        # paused_label = helpers.Label(
+        #     font=self.__font,
+        #     position=pygame.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
+        #     text='PAUSE',
+        #     color=(0, 0, 0)
+        # )
 
         menu_text = \
             "Press SPACE to start the game or for resume / pause the game\n" \
@@ -168,10 +176,10 @@ class Game:
             "A for moving platform to left\n" \
             "D for moving platform to right"
         menu_labels = Game.__render_menu(
-            screen,
+            self.__screen,
             self.__font,
             menu_text,
-            pygame.Vector2(screen.get_width() / 6, screen.get_height() / 4)
+            pygame.Vector2(self.__screen.get_width() / 6, self.__screen.get_height() / 4)
         )
 
         # game setup
@@ -208,9 +216,10 @@ class Game:
                 level.update()
 
             if is_menu_showing or is_paused:
-                self.__draw(screen, None, menu_labels, level.get_top_edge())
+                self.__draw(None, menu_labels, level.get_top_edge())
             else:
-                self.__draw(screen, level.get_sprites_group(), labels, level.get_top_edge())
+                # self.__draw(screen, level.get_sprites_group(), labels, level.get_top_edge())
+                self.__draw(level.get_sprites_group(), labels, level.get_top_edge())
 
             # limit FPS to 60
             clock.tick(60)

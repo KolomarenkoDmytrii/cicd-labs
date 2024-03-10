@@ -346,7 +346,8 @@ class LevelMaker:
         colored_block_images = []
         for color in rainbow_colors:
             image = self.__images['block'].copy()
-            image.fill(color)
+            # make block colored (not completly fill solidly)
+            image.fill(color, special_flags=pygame.BLEND_MULT)
             colored_block_images.append(image)
 
         # make the blocks "net"
