@@ -18,24 +18,29 @@ def main():
     )
 
     parser.add_argument(
-        "--columns", help="set number of columns of the blocks", type=int, default=10
+        "--columns", help="Set number of columns of the blocks", type=int, default=10
     )
     parser.add_argument(
-        "--rows", help="set number of rows of the blocks", type=int, default=5
+        "--rows", help="Set number of rows of the blocks", type=int, default=5
     )
     parser.add_argument(
         "--background",
-        help="set background color. Color of font, lines etc is opposite to background color.",
+        help="Set background color. Color of font, lines etc is opposite to background color.",
         default="black",
         choices=background_colors.keys(),
     )
 
+    parser.add_argument(
+        "--lifes", help="Set number of lifes", default=4, type=int
+    )
     arguments = parser.parse_args()
+
     Game(
         edges=Edges(700, 500),
         num_of_columns=arguments.columns,
         num_of_rows=arguments.rows,
         background_color=background_colors[arguments.background],
+        lifes=arguments.lifes
     ).run()
 
 

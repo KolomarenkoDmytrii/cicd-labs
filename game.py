@@ -15,6 +15,7 @@ class Game:
         num_of_columns: int,
         num_of_rows: int,
         background_color: tuple = (0, 0, 0),
+        lifes: int = 4
     ):
         """Initialize the game application object.
 
@@ -30,9 +31,11 @@ class Game:
             Color of the background. Accent color (color of font, lines etc) is
             opposite to background color thus it equals to
             "(255, 255, 255) - `background_color`", by default (0, 0, 0).
+        lvl: int, Contains number of lives from which the game should begin
         """
         pygame.init()
         pygame.mixer.init()
+        self.lifes = lifes
         self.music = pygame.mixer.Sound('assets/game-music.mp3')
         self.music.play(-1)
 
@@ -215,7 +218,7 @@ class Game:
 
         running: bool = True
         is_paused: bool = False
-        level = self.__level_maker.get_level()
+        level = self.__level_maker.get_level(lifes=self.lifes)
         is_menu_showing: bool = True
         is_music_paused: bool = False
 
