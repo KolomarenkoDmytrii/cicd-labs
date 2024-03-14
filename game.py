@@ -9,7 +9,13 @@ from typing import List
 class Game:
     """Game application class."""
 
-    def __init__(self, edges: helpers.Edges, num_of_columns: int, num_of_rows: int, background_color: tuple = (0, 0, 0)):
+    def __init__(
+        self,
+        edges: helpers.Edges,
+        num_of_columns: int,
+        num_of_rows: int,
+        background_color: tuple = (0, 0, 0),
+    ):
         """Initialize the game application object.
 
         Parameters
@@ -29,59 +35,73 @@ class Game:
 
         self.__edges: helpers.Edges = edges
 
-        self.__screen: pygame.Surface = \
-            pygame.display.set_mode((self.__edges.width, self.__edges.height))
+        self.__screen: pygame.Surface = pygame.display.set_mode(
+            (self.__edges.width, self.__edges.height)
+        )
 
         self.__background_color: tuple[int, int, int] = background_color
         self.__accent_color: tuple[int, int, int] = tuple(
-            pygame.math.Vector3(255, 255, 255) - pygame.math.Vector3(self.__background_color)
+            pygame.math.Vector3(255, 255, 255)
+            - pygame.math.Vector3(self.__background_color)
         )
 
         horizontal_alignment: int = round(self.__edges.width * 0.03)
 
-
         block_width: int = round(
-            (self.__edges.width - horizontal_alignment * 2 - horizontal_alignment * num_of_columns) /
-            num_of_columns
+            (
+                self.__edges.width
+                - horizontal_alignment * 2
+                - horizontal_alignment * num_of_columns
+            )
+            / num_of_columns
         )
         ball_size: int = round(self.__edges.height * 0.03)
 
         ball_image: pygame.Surface = pygame.image.load(
-            os.path.join(os.getcwd(), 'assets', 'ball.png')
+            os.path.join(os.getcwd(), "assets", "ball.png")
         ).convert_alpha(self.__screen)
         ball_image = pygame.transform.scale(ball_image, (ball_size, ball_size))
 
         platform_image: pygame.Surface = pygame.image.load(
-            os.path.join(os.getcwd(), 'assets', 'platform.png')
+            os.path.join(os.getcwd(), "assets", "platform.png")
         ).convert_alpha(self.__screen)
-        platform_image = pygame.transform.scale(platform_image, (round(self.__edges.width * 0.092), ball_size))
+        platform_image = pygame.transform.scale(
+            platform_image, (round(self.__edges.width * 0.092), ball_size)
+        )
 
         block_image: pygame.Surface = pygame.image.load(
-            os.path.join(os.getcwd(), 'assets', 'block.png')
+            os.path.join(os.getcwd(), "assets", "block.png")
         ).convert_alpha(self.__screen)
-        block_image = pygame.transform.scale(block_image, (block_width, block_width * 0.45))
+        block_image = pygame.transform.scale(
+            block_image, (block_width, block_width * 0.45)
+        )
 
         self.__images: dict[str, pygame.Surface] = {
-            'platform': platform_image,
-            'ball': ball_image,
-            'block': block_image
+            "platform": platform_image,
+            "ball": ball_image,
+            "block": block_image,
         }
 
         self.__level_maker: level.LevelMaker = level.LevelMaker(
             edges=self.__edges,
             images=self.__images,
             blocks_layout={
-                'horizontal_alignment': horizontal_alignment,
-                'vertical_alignment': round(self.__edges.height * 0.06),
-                'num_of_rows': num_of_rows
-            }
+                "horizontal_alignment": horizontal_alignment,
+                "vertical_alignment": round(self.__edges.height * 0.06),
+                "num_of_rows": num_of_rows,
+            },
         )
 
         self.__font: pygame.font.Font = pygame.font.Font(
-            os.path.join(os.getcwd(), 'assets', 'font.ttf'), 20
+            os.path.join(os.getcwd(), "assets", "font.ttf"), 20
         )
 
-    def __draw(self, sprites_group: pygame.sprite.Group, labels: List[helpers.Label], y_of_delimiter: int):
+    def __draw(
+        self,
+        sprites_group: pygame.sprite.Group,
+        labels: List[helpers.Label],
+        y_of_delimiter: int,
+    ):
         """Update the image of the game.
 
         Parameters
@@ -106,13 +126,20 @@ class Game:
         pygame.draw.line(
             self.__screen,
             self.__accent_color,
-            (0, y_of_delimiter), (self.__edges.width, y_of_delimiter)
+            (0, y_of_delimiter),
+            (self.__edges.width, y_of_delimiter),
         )
 
         pygame.display.flip()
 
     @staticmethod
-    def __render_menu(screen: pygame.Surface, font: pygame.font.Font, color: tuple, menu_text: str, start_position: Vector2) -> List[helpers.Label]:
+    def __render_menu(
+        screen: pygame.Surface,
+        font: pygame.font.Font,
+        color: tuple,
+        menu_text: str,
+        start_position: Vector2,
+    ) -> List[helpers.Label]:
         """Renders text label of the start / pause game menu text.
 
         Returns
@@ -122,9 +149,7 @@ class Game:
 
         menu_labels = []
         for line in menu_text.splitlines():
-            menu_labels.append(
-                helpers.Label(font, start_position, line, color)
-            )
+            menu_labels.append(helpers.Label(font, start_position, line, color))
             start_position += (0, menu_labels[-1].get_rendered()[1].height)
 
         return menu_labels
@@ -134,40 +159,52 @@ class Game:
 
         clock = pygame.time.Clock()
 
-
         text_color = self.__accent_color
         score_count = helpers.Label(
-            self.__font, pygame.math.Vector2(self.__screen.get_width() / 1.5, 10), 'Score: 0', text_color
+            self.__font,
+            pygame.math.Vector2(self.__screen.get_width() / 1.5, 10),
+            "Score: 0",
+            text_color,
         )
         lifes_count = helpers.Label(
-            self.__font, pygame.math.Vector2(self.__screen.get_width() / 4, 10), 'Lifes: ?', text_color
+            self.__font,
+            pygame.math.Vector2(self.__screen.get_width() / 4, 10),
+            "Lifes: ?",
+            text_color,
         )
         game_over_label = helpers.Label(
             self.__font,
-            pygame.math.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
-            'GAME OVER',
-            text_color
+            pygame.math.Vector2(
+                self.__screen.get_width() * 0.45, self.__screen.get_height() / 2
+            ),
+            "GAME OVER",
+            text_color,
         )
         victory_label = helpers.Label(
             self.__font,
-            pygame.math.Vector2(self.__screen.get_width() * 0.45, self.__screen.get_height() / 2),
-            'YOU WIN!',
-            text_color
+            pygame.math.Vector2(
+                self.__screen.get_width() * 0.45, self.__screen.get_height() / 2
+            ),
+            "YOU WIN!",
+            text_color,
         )
 
-        menu_text = \
-            "Press SPACE to start the game or for resume / pause the game\n" \
-            "Q for exit\n" \
-            "DELETE for reset the game\n" \
-            "CTRL for release the ball\n" \
-            "A for moving platform to left\n" \
+        menu_text = (
+            "Press SPACE to start the game or for resume / pause the game\n"
+            "Q for exit\n"
+            "DELETE for reset the game\n"
+            "CTRL for release the ball\n"
+            "A for moving platform to left\n"
             "D for moving platform to right"
+        )
         menu_labels = Game.__render_menu(
             self.__screen,
             self.__font,
             self.__accent_color,
             menu_text,
-            pygame.math.Vector2(self.__screen.get_width() / 6, self.__screen.get_height() / 4)
+            pygame.math.Vector2(
+                self.__screen.get_width() / 6, self.__screen.get_height() / 4
+            ),
         )
 
         # game setup
@@ -191,8 +228,8 @@ class Game:
                         is_paused = False
                         is_menu_showing = True
 
-            score_count.set_text(f'Score: {level.get_game_state().score}')
-            lifes_count.set_text(f'Lifes: {level.get_game_state().lifes}')
+            score_count.set_text(f"Score: {level.get_game_state().score}")
+            lifes_count.set_text(f"Lifes: {level.get_game_state().lifes}")
             labels = [score_count, lifes_count]
 
             if level.get_game_state().is_game_over:
@@ -207,7 +244,6 @@ class Game:
                 self.__draw(None, menu_labels, level.get_top_edge())
             else:
                 self.__draw(level.get_sprites_group(), labels, level.get_top_edge())
-
 
             clock.tick(60)
 

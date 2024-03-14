@@ -21,7 +21,7 @@ class Entity(Sprite):
         self.image = image
         self.rect = rect
 
-    def is_collided_with(self, other: 'Entity') -> bool:
+    def is_collided_with(self, other: "Entity") -> bool:
         """Check if the entity is collided with another entity.
 
         Parameters

@@ -39,7 +39,15 @@ class Level:
         is_ball_released: bool = False
         is_player_won: bool = False
 
-    def __init__(self, lifes: int, blocks: List[entity.Block], platform: entity.Platform, ball: entity.Ball, edges: pygame.Rect, top_start: int):
+    def __init__(
+        self,
+        lifes: int,
+        blocks: List[entity.Block],
+        platform: entity.Platform,
+        ball: entity.Ball,
+        edges: pygame.Rect,
+        top_start: int,
+    ):
         """Initialize the level object.
 
         Parameters:
@@ -58,8 +66,7 @@ class Level:
         self.__edges = pygame.Rect((0, top_start), (edges.width, edges.height))
 
         self.__state = Level.GameState(
-            ball_released_speed=copy.deepcopy(self.__ball.speed),
-            lifes=lifes
+            ball_released_speed=copy.deepcopy(self.__ball.speed), lifes=lifes
         )
 
         self.__reset_ball()
@@ -101,12 +108,15 @@ class Level:
         """
         return pygame.sprite.Group(self.__platform, self.__ball, *self.__blocks)
 
-    def __adjust_on_x_collision(self, movable_entity_1: entity.MovableEntity, entity_2: entity.Entity) -> None:
+    def __adjust_on_x_collision(
+        self, movable_entity_1: entity.MovableEntity, entity_2: entity.Entity
+    ) -> None:
         """Process collisions on X axis between movable entity and other entity and update their positions and speeds."""
-        # if movable_entity_1 collides with entity_2's left side
-        if movable_entity_1.rect.right > entity_2.rect.left and movable_entity_1.rect.right < entity_2.rect.right:
+        if (
+            movable_entity_1.rect.right > entity_2.rect.left
+            and movable_entity_1.rect.right < entity_2.rect.right
+        ):
             movable_entity_1.rect.right = entity_2.rect.left
-        # otherwise movable_entity_1 collided with entity_2's right side
         else:
             movable_entity_1.rect.left = entity_2.rect.right
         movable_entity_1.speed.x = -movable_entity_1.speed.x
@@ -118,6 +128,7 @@ class Level:
 
     def __process_key_presses(self) -> None:
         """Process key presses and update level objects and state correspondingly."""
+
         def do_update() -> None:
             self.__platform.move()
             if not self.__state.is_ball_released:
@@ -172,8 +183,14 @@ class Level:
                     self.__adjust_on_y_collision(self.__ball)
                     block.set_is_destroyed()
 
-        is_squeezing_on_y = self.__ball.rect.bottom < self.__platform.rect.top or self.__ball.rect.top < self.__platform.rect.bottom
-        is_squeezing_on_x = self.__ball.rect.right > self.__edges.right or self.__ball.rect.left < self.__edges.left
+        is_squeezing_on_y = (
+            self.__ball.rect.bottom < self.__platform.rect.top
+            or self.__ball.rect.top < self.__platform.rect.bottom
+        )
+        is_squeezing_on_x = (
+            self.__ball.rect.right > self.__edges.right
+            or self.__ball.rect.left < self.__edges.left
+        )
         if is_squeezing_on_y and is_squeezing_on_x:
             self.__ball.rect.top = self.__platform.rect.bottom
 
@@ -234,9 +251,9 @@ class LevelMaker:
         """
         self.__edges = edges
         self.__images = images
-        self.__horizontal_alignment = blocks_layout['horizontal_alignment']
-        self.__vertical_alignment = blocks_layout['vertical_alignment']
-        self.__num_of_rows = blocks_layout['num_of_rows']
+        self.__horizontal_alignment = blocks_layout["horizontal_alignment"]
+        self.__vertical_alignment = blocks_layout["vertical_alignment"]
+        self.__num_of_rows = blocks_layout["num_of_rows"]
 
     def get_level(self) -> Level:
         """Get a maked and initialized level.
@@ -245,23 +262,19 @@ class LevelMaker:
             Level: The created level.
         """
         platform = entity.Platform(
-            image=self.__images['platform'],
+            image=self.__images["platform"],
             rect=pygame.Rect(
                 (self.__edges.width / 2, self.__edges.height * 0.75),
-                self.__images['platform'].get_size()
+                self.__images["platform"].get_size(),
             ),
-            speed=pygame.math.Vector2(5, 0)
+            speed=pygame.math.Vector2(5, 0),
         )
         ball = entity.Ball(
-            image=self.__images['ball'],
-            rect=pygame.Rect(
-                (0, 0),
-                self.__images['ball'].get_size()
-            ),
+            image=self.__images["ball"],
+            rect=pygame.Rect((0, 0), self.__images["ball"].get_size()),
             speed=pygame.math.Vector2(
-                round(self.__edges.height * 0.005),
-                -round(self.__edges.height * 0.005)
-            )
+                round(self.__edges.height * 0.005), -round(self.__edges.height * 0.005)
+            ),
         )
 
         x = self.__horizontal_alignment
@@ -277,21 +290,20 @@ class LevelMaker:
         ]
         colored_block_images = []
         for color in rainbow_colors:
-            image = self.__images['block'].copy()
+            image = self.__images["block"].copy()
             image.fill(color, special_flags=pygame.BLEND_MULT)
             colored_block_images.append(image)
 
         blocks = []
         for i in range(0, self.__num_of_rows):
-            while x + self.__images['block'].get_size()[0] < self.__edges.width:
-                blocks.append(entity.Block(
-                    image=colored_block_images[i % len(colored_block_images)],
-                    rect=pygame.Rect(
-                        (x, y),
-                        self.__images['block'].get_size()
+            while x + self.__images["block"].get_size()[0] < self.__edges.width:
+                blocks.append(
+                    entity.Block(
+                        image=colored_block_images[i % len(colored_block_images)],
+                        rect=pygame.Rect((x, y), self.__images["block"].get_size()),
                     )
-                ))
-                x += self.__images['block'].get_size()[0] + self.__horizontal_alignment
+                )
+                x += self.__images["block"].get_size()[0] + self.__horizontal_alignment
 
             x = self.__horizontal_alignment
             y += self.__vertical_alignment
@@ -302,5 +314,5 @@ class LevelMaker:
             platform=platform,
             ball=ball,
             edges=self.__edges,
-            top_start=top_alignment
+            top_start=top_alignment,
         )

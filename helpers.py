@@ -14,7 +14,13 @@ class Edges:
 class Label:
     """Class for drawing text strings."""
 
-    def __init__(self, font: pygame.font.Font, position: Vector2, text: str = '', color: tuple = (0, 0, 0)):
+    def __init__(
+        self,
+        font: pygame.font.Font,
+        position: Vector2,
+        text: str = "",
+        color: tuple = (0, 0, 0),
+    ):
         """Initialize the Label class object.
 
         Parameters
@@ -64,6 +70,9 @@ class Label:
     def __render(self):
         """Render an image of the label text and get its placement rectangle."""
 
-        self.__text_image: pygame.Surface = self.__font.render(self.__text, True, self.color)
-        self.__text_image_rect: pygame.Rect = \
-            self.__text_image.get_rect(x=self.__position.x, y=self.__position.y)
+        self.__text_image: pygame.Surface = self.__font.render(
+            self.__text, True, self.color
+        )
+        self.__text_image_rect: pygame.Rect = self.__text_image.get_rect(
+            x=self.__position.x, y=self.__position.y
+        )
