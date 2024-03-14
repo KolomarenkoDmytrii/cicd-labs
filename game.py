@@ -45,6 +45,7 @@ class Game:
             - pygame.math.Vector3(self.__background_color)
         )
 
+
         horizontal_alignment: int = round(self.__edges.width * 0.03)
 
         block_width: int = round(
@@ -195,7 +196,8 @@ class Game:
             "DELETE for reset the game\n"
             "CTRL for release the ball\n"
             "A for moving platform to left\n"
-            "D for moving platform to right"
+            "D for moving platform to right\n"
+            "Press ALT to set the game with hardcore mode[1 life]"
         )
         menu_labels = Game.__render_menu(
             self.__screen,
@@ -207,7 +209,6 @@ class Game:
             ),
         )
 
-        # game setup
         running: bool = True
         is_paused: bool = False
         level = self.__level_maker.get_level()
@@ -224,9 +225,13 @@ class Game:
                     if event.key == pygame.K_q:
                         running = False
                     if event.key == pygame.K_DELETE:
-                        level = self.__level_maker.get_level()
+                        level = self.__level_maker.get_level(lifes=4)
                         is_paused = not is_paused
                         is_menu_showing = True
+                    if event.key == pygame.K_RALT:
+                        level = self.__level_maker.get_level(lifes=1)
+                        is_paused = not is_paused
+                        is_menu_showing = False
 
 
 
