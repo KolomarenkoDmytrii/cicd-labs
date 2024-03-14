@@ -1,147 +1,134 @@
-"""Create game objects."""
-
 import pygame
+from pygame.sprite import Sprite
+from pygame.rect import Rect
+from pygame.math import Vector2
 
 
-class Entity(pygame.sprite.Sprite):
-    """Base class for game objects.
+class Entity(Sprite):
+    """Base class for game objects."""
 
-    Attributes
-    ----------
-    image: pygame.Surface
-        The image of the entity.
-    rect: pygame.Rect
-        The rectangle that contains position and borders of the entity.
-    """
-
-    def __init__(self, image, rect):
-        """Initalize the entity object.
+    def __init__(self, image: pygame.Surface, rect: pygame.Rect):
+        """Initialize the entity object.
 
         Parameters
         ----------
-        image: pygame.Surface
+        image : pygame.Surface
             The image of the entity.
-        rect: pygame.Rect
+        rect : pygame.Rect
             The rectangle that contains position and borders of the entity.
         """
-
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
         self.image = image
         self.rect = rect
 
-    def is_collided_with(self, other):
-        """Check if the entity is collided with other entity.
+    def is_collided_with(self, other: 'Entity') -> bool:
+        """Check if the entity is collided with another entity.
 
         Parameters
         ----------
-        other: Entity
-            The other entity, for which collision check is doing.
+        other : Entity
+            The other entity, for which collision check is done.
 
         Returns
-        ------
+        -------
         bool
-            If there is collision between `self` and `other`,
-            `True` will be returned. Otherwise `False` will be returned.
+            Returns True if there is a collision between self and other, False otherwise.
         """
-
         return pygame.sprite.collide_rect(self, other)
 
 
 class MovableEntity(Entity):
-    """Base class for movable entities.
+    """Base class for movable entities."""
 
-    Attributes
-    ----------
-    speed: pygame.math.Vector2
-        The speed vector of the entity
-    """
-
-    def __init__(self, image, rect, speed):
-        """Initalize the movable entity object.
+    def __init__(self, image: pygame.Surface, rect: pygame.Rect, speed: Vector2):
+        """Initialize the movable entity object.
 
         Parameters
         ----------
-        image: pygame.Surface
+        image : pygame.Surface
             The image of the entity.
-        rect: pygame.Rect
+        rect : pygame.Rect
             The rectangle that contains position and borders of the entity.
-        speed: pygame.math.Vector2
+        speed : Vector2
             The speed vector of the entity.
         """
-
-        Entity.__init__(self, image, rect)
+        super().__init__(image, rect)
         self.speed = speed
 
     def move(self):
         """Move the entity."""
-
         self.rect.move_ip(self.speed.x, self.speed.y)
 
 
 class Block(Entity):
     """Class for destroyable blocks."""
 
-    def __init__(self, image, rect):
-        Entity.__init__(self, image, rect)
+    def __init__(self, image: pygame.Surface, rect: pygame.Rect):
+        """Initialize the block object.
+
+        Parameters
+        ----------
+        image : pygame.Surface
+            The image of the block.
+        rect : pygame.Rect
+            The rectangle that contains position and borders of the block.
+        """
+        super().__init__(image, rect)
         self.__is_destroyed = False
 
-    def is_destroyed(self):
+    def is_destroyed(self) -> bool:
         """Return whether the block is destroyed or not.
 
         Returns
         -------
         bool
+            Returns True if the block is destroyed, False otherwise.
         """
-
         return self.__is_destroyed
 
     def set_is_destroyed(self):
-        """Mark the block destroyed."""
-
+        """Mark the block as destroyed."""
         self.__is_destroyed = True
 
 
 class Ball(MovableEntity):
     """Class for ball entity."""
 
-    def __init__(self, image, rect, speed):
-        """Initalize the ball object.
+    def __init__(self, image: pygame.Surface, rect: pygame.Rect, speed: Vector2):
+        """Initialize the ball object.
 
         Parameters
         ----------
-        image: pygame.Surface
+        image : pygame.Surface
             The image of the ball.
-        rect: pygame.Rect
+        rect : pygame.Rect
             The rectangle that contains position and borders of the ball.
-        speed: pygame.math.Vector2
+        speed : Vector2
             The speed vector of the ball.
         """
-
-        MovableEntity.__init__(self, image, rect, speed)
+        super().__init__(image, rect, speed)
 
 
 class Platform(MovableEntity):
     """Class for platform entity.
 
-    Note: Platform moves only to left or right, so vertical speed is ignored.
+    Note: Platform moves only left or right, so vertical speed is ignored.
     """
 
-    def __init__(self, image, rect, speed):
-        """Initalize the platform object.
+    def __init__(self, image: pygame.Surface, rect: pygame.Rect, speed: Vector2):
+        """Initialize the platform object.
 
         Parameters
         ----------
-        image: pygame.Surface
+        image : pygame.Surface
             The image of the platform.
-        rect: pygame.Rect
+        rect : pygame.Rect
             The rectangle that contains position and borders of the platform.
-        speed: pygame.math.Vector2
+        speed : Vector2
             The speed vector of the platform.
         """
-
-        MovableEntity.__init__(self, image, rect, speed)
+        super().__init__(image, rect, speed)
 
     def move(self):
-        """Move platform to left or right"""
-
+        """Move the platform left or right."""
         self.rect.move_ip(self.speed.x, 0)

@@ -1,22 +1,20 @@
-"""Start game application."""
-
 import argparse
 from game import Game
 from helpers import Edges
+from typing import Dict
 
 
 def main():
     """Run the game."""
 
-    background_colors = {
+    background_colors: Dict[str, tuple[int, int, int]] = {
         'black': (0, 0, 0),
         'white': (255, 255, 255),
         'darkcyan': (32, 88, 110)
     }
 
     parser = argparse.ArgumentParser(
-        description='The Arkanoid game. For control keys see '
-            'start / pause menu text'
+        description='The Arkanoid game. For control keys see start / pause menu text'
     )
 
     parser.add_argument(
@@ -33,8 +31,7 @@ def main():
     )
     parser.add_argument(
         '--background',
-        help='set background color. Color of font, lines etc '
-            'is opposite to backround color.',
+        help='set background color. Color of font, lines etc is opposite to background color.',
         default='black',
         choices=background_colors.keys()
     )
