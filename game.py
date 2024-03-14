@@ -225,8 +225,10 @@ class Game:
                         running = False
                     if event.key == pygame.K_DELETE:
                         level = self.__level_maker.get_level()
-                        is_paused = False
+                        is_paused = not is_paused
                         is_menu_showing = True
+
+
 
             score_count.set_text(f"Score: {level.get_game_state().score}")
             lifes_count.set_text(f"Lifes: {level.get_game_state().lifes}")
