@@ -32,6 +32,9 @@ class Game:
             "(255, 255, 255) - `background_color`", by default (0, 0, 0).
         """
         pygame.init()
+        pygame.mixer.init()
+        self.music = pygame.mixer.Sound('assets/game-music.mp3')
+        self.music.play(-1)
 
         self.__edges: helpers.Edges = edges
 
@@ -197,7 +200,8 @@ class Game:
             "CTRL for release the ball\n"
             "A for moving platform to left\n"
             "D for moving platform to right\n"
-            "Press ALT to set the game with hardcore mode[1 life]"
+            "Press ALT to set the game with hardcore mode[1 life]\n"
+            "Press F1 to play or stop music"
         )
         menu_labels = Game.__render_menu(
             self.__screen,
@@ -213,6 +217,7 @@ class Game:
         is_paused: bool = False
         level = self.__level_maker.get_level()
         is_menu_showing: bool = True
+        is_music_paused: bool = False
 
         while running:
             for event in pygame.event.get():
@@ -225,13 +230,20 @@ class Game:
                     if event.key == pygame.K_q:
                         running = False
                     if event.key == pygame.K_DELETE:
-                        level = self.__level_maker.get_level(lifes=4)
+                        level = self.__level_maker.get_level()
                         is_paused = not is_paused
                         is_menu_showing = True
                     if event.key == pygame.K_RALT:
                         level = self.__level_maker.get_level(lifes=1)
                         is_paused = not is_paused
                         is_menu_showing = False
+                    if event.key == pygame.K_F1:
+                        is_music_paused = not is_music_paused
+                        if is_music_paused:
+                            self.music.stop()
+                        else:
+                            self.music.play(-1)
+
 
 
 
