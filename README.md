@@ -67,6 +67,15 @@ When running the game from the command line, you can specify various options to 
 
 The game itself is well-documented, and you can find documentation for every method in project files. Below showed all main classes of the project
 
+
+#### Soundtrack
+- To change soundtrack you can do it in two ways
+  + Find a game_music.mp3 file delete it and paste another music with the same name
+  + On the screenshot below you can find in file game code where you can change the name of soundtrack
+  + If you want not to play music endless change -1 to 1 on screenshot below
+
+![img.png](soundtrack-image/img.png)
+
 ####  Game Class
 - The Game class serves as the main application controller. It encapsulates the game's logic, manages game objects.
   + `__init__(edges: Edges, num_of_columns: int, num_of_rows: int, background_color: tuple[int, int, int])`: Initializes the game application object.
