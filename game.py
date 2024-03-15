@@ -10,12 +10,12 @@ class Game:
     """Game application class."""
 
     def __init__(
-        self,
-        edges: helpers.Edges,
-        num_of_columns: int,
-        num_of_rows: int,
-        background_color: tuple = (0, 0, 0),
-        lifes: int = 4
+            self,
+            edges: helpers.Edges,
+            num_of_columns: int,
+            num_of_rows: int,
+            background_color: tuple = (0, 0, 0),
+            lifes: int = 4
     ):
         """Initialize the game application object.
 
@@ -31,7 +31,7 @@ class Game:
             Color of the background. Accent color (color of font, lines etc) is
             opposite to background color thus it equals to
             "(255, 255, 255) - `background_color`", by default (0, 0, 0).
-        lvl: int, Contains number of lives from which the game should begin
+        lifes: int, Contains number of lives from which the game should begin
         """
         pygame.init()
         pygame.mixer.init()
@@ -51,14 +51,13 @@ class Game:
             - pygame.math.Vector3(self.__background_color)
         )
 
-
         horizontal_alignment: int = round(self.__edges.width * 0.03)
 
         block_width: int = round(
             (
-                self.__edges.width
-                - horizontal_alignment * 2
-                - horizontal_alignment * num_of_columns
+                    self.__edges.width
+                    - horizontal_alignment * 2
+                    - horizontal_alignment * num_of_columns
             )
             / num_of_columns
         )
@@ -104,10 +103,10 @@ class Game:
         )
 
     def __draw(
-        self,
-        sprites_group: pygame.sprite.Group,
-        labels: List[helpers.Label],
-        y_of_delimiter: int,
+            self,
+            sprites_group: pygame.sprite.Group | None,
+            labels: List[helpers.Label],
+            y_of_delimiter: int,
     ):
         """Update the image of the game.
 
@@ -141,11 +140,10 @@ class Game:
 
     @staticmethod
     def __render_menu(
-        screen: pygame.Surface,
-        font: pygame.font.Font,
-        color: tuple,
-        menu_text: str,
-        start_position: Vector2,
+            font: pygame.font.Font,
+            color: tuple,
+            menu_text: str,
+            start_position: Vector2,
     ) -> List[helpers.Label]:
         """Renders text label of the start / pause game menu text.
 
@@ -207,7 +205,6 @@ class Game:
             "Press F1 to play or stop music"
         )
         menu_labels = Game.__render_menu(
-            self.__screen,
             self.__font,
             self.__accent_color,
             menu_text,
@@ -218,7 +215,7 @@ class Game:
 
         running: bool = True
         is_paused: bool = False
-        level = self.__level_maker.get_level(lifes=self.lifes)
+        lvl = self.__level_maker.get_level(lifes=self.lifes)
         is_menu_showing: bool = True
         is_music_paused: bool = False
 
@@ -233,11 +230,11 @@ class Game:
                     if event.key == pygame.K_q:
                         running = False
                     if event.key == pygame.K_DELETE:
-                        level = self.__level_maker.get_level()
+                        lvl = self.__level_maker.get_level()
                         is_paused = not is_paused
                         is_menu_showing = True
                     if event.key == pygame.K_RALT:
-                        level = self.__level_maker.get_level(lifes=1)
+                        lvl = self.__level_maker.get_level(lifes=1)
                         is_paused = not is_paused
                         is_menu_showing = False
                     if event.key == pygame.K_F1:
@@ -247,25 +244,23 @@ class Game:
                         else:
                             self.music.play(-1)
 
+            score_count.set_text(f"Score: {lvl.get_game_state().score}")
+            lifes_count.set_text(f"Lifes: {lvl.get_game_state().lifes}")
 
-
-
-            score_count.set_text(f"Score: {level.get_game_state().score}")
-            lifes_count.set_text(f"Lifes: {level.get_game_state().lifes}")
             labels = [score_count, lifes_count]
 
-            if level.get_game_state().is_game_over:
+            if lvl.get_game_state().is_game_over:
                 labels.append(game_over_label)
 
-            elif level.get_game_state().is_player_won:
+            elif lvl.get_game_state().is_player_won:
                 labels.append(victory_label)
             elif not is_paused:
-                level.update()
+                lvl.update()
 
             if is_menu_showing or is_paused:
-                self.__draw(None, menu_labels, level.get_top_edge())
+                self.__draw(None, menu_labels, lvl.get_top_edge())
             else:
-                self.__draw(level.get_sprites_group(), labels, level.get_top_edge())
+                self.__draw(lvl.get_sprites_group(), labels, lvl.get_top_edge())
 
             clock.tick(60)
 

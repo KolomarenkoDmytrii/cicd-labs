@@ -15,11 +15,11 @@ class Label:
     """Class for drawing text strings."""
 
     def __init__(
-        self,
-        font: pygame.font.Font,
-        position: Vector2,
-        text: str = "",
-        color: tuple = (0, 0, 0),
+            self,
+            font: pygame.font.Font,
+            position: Vector2,
+            text: str = "",
+            color: tuple = (0, 0, 0),
     ):
         """Initialize the Label class object.
 
@@ -40,8 +40,8 @@ class Label:
         self.__text: str = text
         self.color: tuple = color
 
-        self.__text_image: pygame.Surface = None
-        self.__text_image_rect: pygame.Rect = None
+        self.__text_image: pygame.Surface | None = None
+        self.__text_image_rect: pygame.Rect | None = None
         self.__render()
 
     def get_rendered(self) -> tuple[pygame.Surface, pygame.Rect]:

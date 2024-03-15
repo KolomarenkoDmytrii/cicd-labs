@@ -1,6 +1,5 @@
 import pygame
 from pygame.sprite import Sprite
-from pygame.rect import Rect
 from pygame.math import Vector2
 
 

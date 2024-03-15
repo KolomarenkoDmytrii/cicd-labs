@@ -5,7 +5,7 @@ import copy
 import pygame
 import entity
 import helpers
-from typing import List, Tuple
+from typing import List
 
 
 class Level:
@@ -28,7 +28,7 @@ class Level:
         Attributes:
             ball_released_speed (pygame.math.Vector2): Initial speed of the level ball.
             score (int): Game score of the level.
-            life (int): Contains number of player tries (lifes)
+            lifes (int): Contains number of player tries (lifes)
             is_game_over (bool): Indicates whether game is ended or not.
         """
 
@@ -40,13 +40,13 @@ class Level:
         is_player_won: bool = False
 
     def __init__(
-        self,
-        lifes: int,
-        blocks: List[entity.Block],
-        platform: entity.Platform,
-        ball: entity.Ball,
-        edges: pygame.Rect,
-        top_start: int,
+            self,
+            lifes: int,
+            blocks: List[entity.Block],
+            platform: entity.Platform,
+            ball: entity.Ball,
+            edges: pygame.Rect,
+            top_start: int,
     ):
         """Initialize the level object.
 
@@ -109,12 +109,12 @@ class Level:
         return pygame.sprite.Group(self.__platform, self.__ball, *self.__blocks)
 
     def __adjust_on_x_collision(
-        self, movable_entity_1: entity.MovableEntity, entity_2: entity.Entity
+            self, movable_entity_1: entity.MovableEntity, entity_2: entity.Entity
     ) -> None:
-        """Process collisions on X axis between movable entity and other entity and update their positions and speeds."""
+        """Process collisions on X axis between movable entity and other entity and update their positions and
+        speeds."""
         if (
-            movable_entity_1.rect.right > entity_2.rect.left
-            and movable_entity_1.rect.right < entity_2.rect.right
+                entity_2.rect.left < movable_entity_1.rect.right < entity_2.rect.right
         ):
             movable_entity_1.rect.right = entity_2.rect.left
         else:
@@ -122,7 +122,8 @@ class Level:
         movable_entity_1.speed.x = -movable_entity_1.speed.x
 
     def __adjust_on_y_collision(self, movable_entity: entity.MovableEntity) -> None:
-        """Process collisions on Y axis between movable entity and other entity and update their positions and speeds."""
+        """Process collisions on Y axis between movable entity and other entity and update their positions and
+        speeds."""
         movable_entity.rect.y -= movable_entity.speed.y
         movable_entity.speed.y = -movable_entity.speed.y
 
@@ -184,12 +185,12 @@ class Level:
                     block.set_is_destroyed()
 
         is_squeezing_on_y = (
-            self.__ball.rect.bottom < self.__platform.rect.top
-            or self.__ball.rect.top < self.__platform.rect.bottom
+                self.__ball.rect.bottom < self.__platform.rect.top
+                or self.__ball.rect.top < self.__platform.rect.bottom
         )
         is_squeezing_on_x = (
-            self.__ball.rect.right > self.__edges.right
-            or self.__ball.rect.left < self.__edges.left
+                self.__ball.rect.right > self.__edges.right
+                or self.__ball.rect.left < self.__edges.left
         )
         if is_squeezing_on_y and is_squeezing_on_x:
             self.__ball.rect.top = self.__platform.rect.bottom
@@ -255,7 +256,7 @@ class LevelMaker:
         self.__vertical_alignment = blocks_layout["vertical_alignment"]
         self.__num_of_rows = blocks_layout["num_of_rows"]
 
-    def get_level(self) -> Level:
+    def get_level(self, lifes: int = 4) -> Level:
         """Get a maked and initialized level.
 
         Returns:
@@ -309,7 +310,7 @@ class LevelMaker:
             y += self.__vertical_alignment
 
         return Level(
-            lifes=4,
+            lifes=lifes,
             blocks=blocks,
             platform=platform,
             ball=ball,
