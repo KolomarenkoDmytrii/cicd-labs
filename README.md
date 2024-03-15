@@ -74,7 +74,7 @@ The game itself is well-documented, and you can find documentation for every met
   + On the screenshot below you can find in file game code where you can change the name of soundtrack
   + If you want not to play music endless change -1 to 1 on screenshot below
 
-![img.png](soundtrack-image/img.png)
+![img.png](assets/img.png)
 
 ####  Game Class
 - The Game class serves as the main application controller. It encapsulates the game's logic, manages game objects.
