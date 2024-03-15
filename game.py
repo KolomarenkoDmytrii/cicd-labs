@@ -233,7 +233,7 @@ class Game:
                         lvl = self.__level_maker.get_level()
                         is_paused = not is_paused
                         is_menu_showing = True
-                    if event.key == pygame.K_RALT:
+                    if event.key == pygame.K_RALT or event.key == pygame.K_LALT:
                         lvl = self.__level_maker.get_level(lifes=1)
                         is_paused = not is_paused
                         is_menu_showing = False
