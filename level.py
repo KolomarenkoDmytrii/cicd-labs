@@ -108,8 +108,9 @@ class Level:
         """
         return pygame.sprite.Group(self.__platform, self.__ball, *self.__blocks)
 
+    @staticmethod
     def __adjust_on_x_collision(
-            self, movable_entity_1: entity.MovableEntity, entity_2: entity.Entity
+            movable_entity_1: entity.MovableEntity, entity_2: entity.Entity
     ) -> None:
         """Process collisions on X axis between movable entity and other entity and update their positions and
         speeds."""
@@ -121,7 +122,8 @@ class Level:
             movable_entity_1.rect.left = entity_2.rect.right
         movable_entity_1.speed.x = -movable_entity_1.speed.x
 
-    def __adjust_on_y_collision(self, movable_entity: entity.MovableEntity) -> None:
+    @staticmethod
+    def __adjust_on_y_collision(movable_entity: entity.MovableEntity) -> None:
         """Process collisions on Y axis between movable entity and other entity and update their positions and
         speeds."""
         movable_entity.rect.y -= movable_entity.speed.y
