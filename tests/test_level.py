@@ -67,13 +67,9 @@ def test_processing_key_presses(monkeypatch):
     index = (i for i in range(len(keys_set)))
 
     def get_pygame_pressess():
-        # for keys in keys_set:
-        #     yield keys
-        global i
         return keys_set[next(index)]
 
-    # monkeypatch.setattr("pygame.key.get_pressed", lambda: keys_set[next(index)])
-    monkeypatch.setattr("pygame.key.get_pressed", get_pygame_pressess)
+    monkeypatch.setattr("pygame.key.get_pressed", get_pygame_presses)
 
     tested_level = level.Level(
         lifes=4,
