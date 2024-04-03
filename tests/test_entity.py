@@ -38,7 +38,7 @@ from .. import entity
     ],
 )
 def test_entities_collision(one: entity.Entity, other: entity.Entity):
-    assert one.is_collided_with(other) == True
+    assert one.is_collided_with(other)
 
 
 def test_moving_of_movable_entity():
@@ -105,7 +105,7 @@ def test_adjusting_on_y_collision():
         None, pygame.Rect(12, 12, 6, 6), copy.deepcopy(speed)
     )
 
-    #entity.adjust_on_y_collision(top_movable_entity, static_entity)
+    # entity.adjust_on_y_collision(top_movable_entity, static_entity)
     entity.adjust_on_y_collision(top_movable_entity, static_entity)
     assert top_movable_entity.rect.bottom == static_entity.rect.top
     assert top_movable_entity.speed.y == -speed.y
