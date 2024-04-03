@@ -134,21 +134,38 @@ class Platform(MovableEntity):
 
 
 def adjust_on_x_collision(
-    movable_entity_1: MovableEntity, entity_2: Entity
+    movable_entity: MovableEntity, entity: Entity
 ) -> None:
     """Process collisions on X axis between movable entity and other entity and update their positions and
-    speeds."""
+    speeds.
+
+    Parameters
+    ----------
+    movable_entity : pygame.Surface
+        The image of the platform.
+    entity : pygame.Rect
+        The rectangle that contains position and borders of the platform.
+    """
+    # if collides on the left side
     if (
-        entity_2.rect.left < movable_entity_1.rect.right < entity_2.rect.right
+        entity.rect.left < movable_entity.rect.right < entity.rect.right
     ):
-        movable_entity_1.rect.right = entity_2.rect.left
+        movable_entity.rect.right = entity.rect.left
+    # if collides on the right side
     else:
-        movable_entity_1.rect.left = entity_2.rect.right
-    movable_entity_1.speed.x = -movable_entity_1.speed.x
+        movable_entity.rect.left = entity.rect.right
+
+    movable_entity.speed.x = -movable_entity.speed.x
 
 
-def adjust_on_y_collision(movable_entity: MovableEntity) -> None:
+def adjust_on_y_collision(movable_entity: MovableEntity, entity: Entity) -> None:
     """Process collisions on Y axis between movable entity and other entity and update their positions and
     speeds."""
-    movable_entity.rect.y -= movable_entity.speed.y
+    # if collides on the top side
+    if movable_entity.rect.top < entity.rect.top < movable_entity.rect.bottom:
+        movable_entity.rect.bottom = entity.rect.top
+    # if collides on the bottom side
+    else:
+        movable_entity.rect.top = entity.rect.bottom
+
     movable_entity.speed.y = -movable_entity.speed.y

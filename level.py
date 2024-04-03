@@ -151,9 +151,10 @@ class Level:
                     entity.adjust_on_x_collision(self.__ball, block)
                     block.set_is_destroyed()
 
+        # Checking collision on the Y axis
         self.__ball.rect.y += self.__ball.speed.y
         if self.__ball.is_collided_with(self.__platform):
-            entity.adjust_on_y_collision(self.__ball)
+            entity.adjust_on_y_collision(self.__ball, self.__platform)
 
         elif self.__ball.rect.bottom > self.__edges.bottom:
             self.__reset_ball()
@@ -165,7 +166,7 @@ class Level:
         else:
             for block in self.__blocks:
                 if self.__ball.is_collided_with(block):
-                    entity.adjust_on_y_collision(self.__ball)
+                    entity.adjust_on_y_collision(self.__ball, block)
                     block.set_is_destroyed()
 
         is_squeezing_on_y = (

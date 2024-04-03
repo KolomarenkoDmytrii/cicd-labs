@@ -74,17 +74,7 @@ def test_moving_of_platform(platform: entity.Platform, expected: entity.Platform
     assert platform.rect == expected.rect
 
 
-def test_adjusting_on_x_collision(monkeypatch):
-    monkeypatch.setattr(
-        "pygame.key.get_pressed",
-        lambda: {
-            pygame.K_a: False,
-            pygame.K_RCTRL: False,
-            pygame.K_LCTRL: False,
-            pygame.K_d: False,
-        },
-    )
-
+def test_adjusting_on_x_collision():
     static_entity = entity.Block(None, pygame.Rect(10, 5, 10, 10))
 
     speed = pygame.Vector2(10, 0)
@@ -102,3 +92,24 @@ def test_adjusting_on_x_collision(monkeypatch):
     entity.adjust_on_x_collision(right_movable_entity, static_entity)
     assert right_movable_entity.rect.left == static_entity.rect.right
     assert right_movable_entity.speed.x == -speed.x
+
+
+def test_adjusting_on_y_collision():
+    static_entity = entity.Entity(None, pygame.Rect(10, 5, 10, 10))
+
+    speed = pygame.Vector2(0, 10)
+    top_movable_entity = entity.MovableEntity(
+        None, pygame.Rect(12, 1, 6, 6), copy.deepcopy(speed)
+    )
+    bottom_movable_entity = entity.MovableEntity(
+        None, pygame.Rect(12, 12, 6, 6), copy.deepcopy(speed)
+    )
+
+    #entity.adjust_on_y_collision(top_movable_entity, static_entity)
+    entity.adjust_on_y_collision(top_movable_entity, static_entity)
+    assert top_movable_entity.rect.bottom == static_entity.rect.top
+    assert top_movable_entity.speed.y == -speed.y
+
+    entity.adjust_on_y_collision(bottom_movable_entity, static_entity)
+    assert bottom_movable_entity.rect.top == static_entity.rect.bottom
+    assert bottom_movable_entity.speed.y == -speed.y
