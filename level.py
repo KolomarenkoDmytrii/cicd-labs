@@ -5,6 +5,8 @@ import copy
 import pygame
 import entity
 import helpers
+#from . import entity
+#from . import helpers
 from typing import List
 
 
@@ -108,27 +110,6 @@ class Level:
         """
         return pygame.sprite.Group(self.__platform, self.__ball, *self.__blocks)
 
-    @staticmethod
-    def __adjust_on_x_collision(
-            movable_entity_1: entity.MovableEntity, entity_2: entity.Entity
-    ) -> None:
-        """Process collisions on X axis between movable entity and other entity and update their positions and
-        speeds."""
-        if (
-                entity_2.rect.left < movable_entity_1.rect.right < entity_2.rect.right
-        ):
-            movable_entity_1.rect.right = entity_2.rect.left
-        else:
-            movable_entity_1.rect.left = entity_2.rect.right
-        movable_entity_1.speed.x = -movable_entity_1.speed.x
-
-    @staticmethod
-    def __adjust_on_y_collision(movable_entity: entity.MovableEntity) -> None:
-        """Process collisions on Y axis between movable entity and other entity and update their positions and
-        speeds."""
-        movable_entity.rect.y -= movable_entity.speed.y
-        movable_entity.speed.y = -movable_entity.speed.y
-
     def __process_key_presses(self) -> None:
         """Process key presses and update level objects and state correspondingly."""
 
@@ -154,7 +135,8 @@ class Level:
         # Checking collision on the X axis
         self.__ball.rect.x += self.__ball.speed.x
         if self.__ball.is_collided_with(self.__platform):
-            self.__adjust_on_x_collision(self.__ball, self.__platform)
+            #self.__adjust_on_x_collision(self.__ball, self.__platform)
+            entity.adjust_on_x_collision(self.__ball, self.__platform)
 
         elif self.__ball.rect.right > self.__edges.right:
             self.__ball.rect.right = self.__edges.right
@@ -166,12 +148,12 @@ class Level:
         else:
             for block in self.__blocks:
                 if self.__ball.is_collided_with(block):
-                    self.__adjust_on_x_collision(self.__ball, block)
+                    entity.adjust_on_x_collision(self.__ball, block)
                     block.set_is_destroyed()
 
         self.__ball.rect.y += self.__ball.speed.y
         if self.__ball.is_collided_with(self.__platform):
-            self.__adjust_on_y_collision(self.__ball)
+            entity.adjust_on_y_collision(self.__ball)
 
         elif self.__ball.rect.bottom > self.__edges.bottom:
             self.__reset_ball()
@@ -183,7 +165,7 @@ class Level:
         else:
             for block in self.__blocks:
                 if self.__ball.is_collided_with(block):
-                    self.__adjust_on_y_collision(self.__ball)
+                    entity.adjust_on_y_collision(self.__ball)
                     block.set_is_destroyed()
 
         is_squeezing_on_y = (

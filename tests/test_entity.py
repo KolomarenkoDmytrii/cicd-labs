@@ -1,3 +1,5 @@
+import copy
+
 import pytest
 import pygame
 
@@ -70,3 +72,33 @@ def test_moving_of_movable_entity():
 def test_moving_of_platform(platform: entity.Platform, expected: entity.Platform):
     platform.move()
     assert platform.rect == expected.rect
+
+
+def test_adjusting_on_x_collision(monkeypatch):
+    monkeypatch.setattr(
+        "pygame.key.get_pressed",
+        lambda: {
+            pygame.K_a: False,
+            pygame.K_RCTRL: False,
+            pygame.K_LCTRL: False,
+            pygame.K_d: False,
+        },
+    )
+
+    static_entity = entity.Block(None, pygame.Rect(10, 5, 10, 10))
+
+    speed = pygame.Vector2(10, 0)
+    left_movable_entity = entity.Ball(
+        None, pygame.Rect(5, 5, 10, 10), copy.deepcopy(speed)
+    )
+    right_movable_entity = entity.Platform(
+        None, pygame.Rect(19, 5, 10, 10), copy.deepcopy(speed)
+    )
+
+    entity.adjust_on_x_collision(left_movable_entity, static_entity)
+    assert left_movable_entity.rect.right == static_entity.rect.left
+    assert left_movable_entity.speed.x == -speed.x
+
+    entity.adjust_on_x_collision(right_movable_entity, static_entity)
+    assert right_movable_entity.rect.left == static_entity.rect.right
+    assert right_movable_entity.speed.x == -speed.x

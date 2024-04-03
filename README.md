@@ -112,6 +112,12 @@ The game itself is well-documented, and you can find documentation for every met
 - The Platform class is needed for representing the platform entity within the game.
   + ``` __init__(image: pygame.Surface, rect: pygame.Rect, speed: Vector2)```: Initializes the platform object.
   + ```move()```: Moves the platform left or right.
+  
+#### Functions of entity module
+- ```adjust_on_x_collision(movable_entity_1: MovableEntity, entity_2: Entity) -> None```: Process collisions on X axis 
+between movable entity and other entity and update their positions and speeds.
+- ```adjust_on_y_collision(movable_entity: MovableEntity) -> None```: Process collisions on Y axis between movable entity 
+and other entity and update their positions and speeds.
 
 
 ## Notes

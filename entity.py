@@ -131,3 +131,24 @@ class Platform(MovableEntity):
     def move(self):
         """Move the platform left or right."""
         self.rect.move_ip(self.speed.x, 0)
+
+
+def adjust_on_x_collision(
+    movable_entity_1: MovableEntity, entity_2: Entity
+) -> None:
+    """Process collisions on X axis between movable entity and other entity and update their positions and
+    speeds."""
+    if (
+        entity_2.rect.left < movable_entity_1.rect.right < entity_2.rect.right
+    ):
+        movable_entity_1.rect.right = entity_2.rect.left
+    else:
+        movable_entity_1.rect.left = entity_2.rect.right
+    movable_entity_1.speed.x = -movable_entity_1.speed.x
+
+
+def adjust_on_y_collision(movable_entity: MovableEntity) -> None:
+    """Process collisions on Y axis between movable entity and other entity and update their positions and
+    speeds."""
+    movable_entity.rect.y -= movable_entity.speed.y
+    movable_entity.speed.y = -movable_entity.speed.y
