@@ -141,10 +141,10 @@ def adjust_on_x_collision(
 
     Parameters
     ----------
-    movable_entity : pygame.Surface
-        The image of the platform.
-    entity : pygame.Rect
-        The rectangle that contains position and borders of the platform.
+    movable_entity : entity.MovableEntity
+        Movable entity which has collision on X axis.
+    entity : entity.Entity
+        Any other entity with which movable entity has collided.
     """
     # if collides on the left side
     if (
@@ -159,8 +159,16 @@ def adjust_on_x_collision(
 
 
 def adjust_on_y_collision(movable_entity: MovableEntity, entity: Entity) -> None:
-    """Process collisions on Y axis between movable entity and other entity and update their positions and
-    speeds."""
+    """Process collisions on Y axis between movable entity and other entity and
+        update their positions and speeds.
+
+    Parameters
+    ----------
+    movable_entity : entity.MovableEntity
+        Movable entity which has collision on Y axis.
+    entity : entity.Entity
+        Any other entity with which movable entity has collided.
+    """
     # if collides on the top side
     if movable_entity.rect.top < entity.rect.top < movable_entity.rect.bottom:
         movable_entity.rect.bottom = entity.rect.top

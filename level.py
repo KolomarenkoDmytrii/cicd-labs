@@ -5,8 +5,6 @@ import copy
 import pygame
 import entity
 import helpers
-#from . import entity
-#from . import helpers
 from typing import List
 
 
@@ -25,13 +23,15 @@ class Level:
 
     @dataclass
     class GameState:
-        """Dataclass for containing width and height of edges.
+        """Dataclass for containing and (external) reading of game state.
 
         Attributes:
             ball_released_speed (pygame.math.Vector2): Initial speed of the level ball.
             score (int): Game score of the level.
             lifes (int): Contains number of player tries (lifes)
-            is_game_over (bool): Indicates whether game is ended or not.
+            is_game_over (bool): Indicates whether game is lost or not.
+            is_game_won (bool): Indicates whether player is won or not.
+            is_ball_released (bool): Indicates whether ball is realsed from platform or not.
         """
 
         ball_released_speed: pygame.math.Vector2
@@ -135,7 +135,6 @@ class Level:
         # Checking collision on the X axis
         self.__ball.rect.x += self.__ball.speed.x
         if self.__ball.is_collided_with(self.__platform):
-            #self.__adjust_on_x_collision(self.__ball, self.__platform)
             entity.adjust_on_x_collision(self.__ball, self.__platform)
 
         elif self.__ball.rect.right > self.__edges.right:
