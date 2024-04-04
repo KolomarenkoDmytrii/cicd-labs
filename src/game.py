@@ -36,7 +36,9 @@ class Game:
         pygame.init()
         pygame.mixer.init()
         self.lifes = lifes
-        self.music = pygame.mixer.Sound("assets/game-music.mp3")
+        self.music = pygame.mixer.Sound(
+            os.path.join(os.getcwd(), "assets", "game-music.mp3")
+        )
         self.music.play(-1)
 
         self.__edges: helpers.Edges = edges
