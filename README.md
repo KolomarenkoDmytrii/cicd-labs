@@ -16,7 +16,7 @@ This repository contains a Python implementation of the Arkanoid game, featuring
 
 For more information about the original Arkanoid game, you can refer to its [Wikipedia — Arkanoid](https://en.wikipedia.org/wiki/Arkanoid).
 
-To view the available command-line arguments for running the game, you can execute the following command: `python main.py -h`.
+To view the available command-line arguments for running the game, you can execute the following command: `python src/main.py -h`.
 
 ## Controls
 - *SPACE* to start the game or for resume / pause the game;
