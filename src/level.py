@@ -42,13 +42,13 @@ class Level:
         is_player_won: bool = False
 
     def __init__(
-            self,
-            lifes: int,
-            blocks: List[entity.Block],
-            platform: entity.Platform,
-            ball: entity.Ball,
-            edges: pygame.Rect,
-            top_start: int,
+        self,
+        lifes: int,
+        blocks: List[entity.Block],
+        platform: entity.Platform,
+        ball: entity.Ball,
+        edges: pygame.Rect,
+        top_start: int,
     ):
         """Initialize the level object.
 
@@ -169,12 +169,12 @@ class Level:
                     block.set_is_destroyed()
 
         is_squeezing_on_y = (
-                self.__ball.rect.bottom < self.__platform.rect.top
-                or self.__ball.rect.top < self.__platform.rect.bottom
+            self.__ball.rect.bottom < self.__platform.rect.top
+            or self.__ball.rect.top < self.__platform.rect.bottom
         )
         is_squeezing_on_x = (
-                self.__ball.rect.right > self.__edges.right
-                or self.__ball.rect.left < self.__edges.left
+            self.__ball.rect.right > self.__edges.right
+            or self.__ball.rect.left < self.__edges.left
         )
         if is_squeezing_on_y and is_squeezing_on_x:
             self.__ball.rect.top = self.__platform.rect.bottom

@@ -30,9 +30,7 @@ def main():
         choices=background_colors.keys(),
     )
 
-    parser.add_argument(
-        "--lifes", help="Set number of lifes", default=4, type=int
-    )
+    parser.add_argument("--lifes", help="Set number of lifes", default=4, type=int)
     arguments = parser.parse_args()
 
     Game(
@@ -40,7 +38,7 @@ def main():
         num_of_columns=arguments.columns,
         num_of_rows=arguments.rows,
         background_color=background_colors[arguments.background],
-        lifes=arguments.lifes
+        lifes=arguments.lifes,
     ).run()
 
 
