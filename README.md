@@ -14,7 +14,7 @@ Install all dependencies of the project with command ``` pin install -r requirem
 ## About
 This repository contains a Python implementation of the Arkanoid game, featuring customizable level, a movable platform, and destructible blocks. Players can control the platform to bounce the ball and destroy blocks to earn points.
 
-For more information about the original Arkanoid game, you can refer to its [Wikipedia -- Arkanoid](https://en.wikipedia.org/wiki/Arkanoid).
+For more information about the original Arkanoid game, you can refer to its [Wikipedia — Arkanoid](https://en.wikipedia.org/wiki/Arkanoid).
 
 To view the available command-line arguments for running the game, you can execute the following command: `python main.py -h`.
 
@@ -46,29 +46,36 @@ When running the game from the command line, you can specify various options to 
 
 ## Project structure
 - `README.md`: this file.
-- `main.py`: main exutable which start the game
-- `game.py`: main game routine.
-- `level.py`: create and manage level.
-- `entity.py`: module for game objects.
-- `helpers.py`: various helpers for other modules.
+- `.gitignore`: file that defines what git should ignore.
+- `requirements.txt`: dependencies of the project.
+- `.flake8`: configuration file for flake8.
+- `.pytest.ini`: configuration file for pytest.
+- `src`: folder with source code of the game:
+    + `main.py`: main exutable which start the game.
+    + `game.py`: main game routine.
+    + `level.py`: create and manage level.
+    + `entity.py`: module for game objects.
+    + `helpers.py`: various helpers for other modules.
 - `assets_sources.txt`: information about where assets file were gotten.
-- `assets`: folder with used assets files.
+- `assets`: folder with used assets files:
     + `ball.png`: image of the ball.
     + `platform.png`: image of the platform.
     + `block.png`: image of destroyable blocks.
     + `font.ttf`: font used for rendering text.
     + `game-music.mp3` used for background music.
-    + `game-example.png` image of gameplay used in readme
-    + `options-1.png` image of available options used in readme
-    + `options-2.png` image of available options used in readme
-
+    + `game-example.png` image of gameplay used in readme.
+    + `options-1.png` image of available options used in readme.
+    + `options-2.png` image of available options used in readme.
+- `tests`: folder with unit-tests:
+    + `test_entity.py`: unit-tests for `entity` module.
+    + `test_level.py`: unit-tests for `level` module.
 
 ## Documentation
 
 The game itself is well-documented, and you can find documentation for every method in project files. Below showed all main classes of the project
 
 
-#### Soundtrack
+### Soundtrack
 - To change soundtrack you can do it in two ways
   + Find a game_music.mp3 file delete it and paste another music with the same name
   + On the screenshot below you can find in file game code where you can change the name of soundtrack
@@ -76,13 +83,14 @@ The game itself is well-documented, and you can find documentation for every met
 
 ![img.png](assets/img.png)
 
-####  Game Class
-- The Game class serves as the main application controller. It encapsulates the game's logic, manages game objects.
+### Defined classes and functions
+#### `Game` Class
+- The `Game` class serves as the main application controller. It encapsulates the game's logic, manages game objects.
   + `__init__(edges: Edges, num_of_columns: int, num_of_rows: int, background_color: tuple[int, int, int])`: Initializes the game application object.
   + `run()`: Runs the game application.
 
-#### Level Class
-- The Level class encapsulates the logic and management of individual game levels in.
+#### `Level` Class
+- The `Level` class encapsulates the logic and management of individual game levels in.
   + ```__init__(lifes: int, blocks: List[Block], platform: Platform, ball: Ball, edges: pygame.Rect, top_start: int)```: Initializes the level object.
   + ```get_top_edge() -> int```: Returns the value of the top of the game area.
   + ```release_ball()```: Releases the ball from the platform. 
@@ -90,37 +98,37 @@ The game itself is well-documented, and you can find documentation for every met
   + ```get_sprites_group() -> pygame.sprite.Group```:Returns game objects as one group. 
   + ```update()```: Updates the level's state and objects.
 
-#### MovableEntity Class
-- The MovableEntity class represents entities within the game that have the ability to move, such as the ball and the platform.
+#### `MovableEntity` Class
+- The `MovableEntity` class represents entities within the game that have the ability to move, such as the ball and the platform.
   + ```__init__(image: pygame.Surface, rect: pygame.Rect, speed: Vector2)```: Initializes the movable entity object.
   + ```move()```: Moves the entity.
 
 
-#### Block Class
-- The Block class serves represents the  blocks that the player aims to eliminate.
+#### `Block` Class
+- The `Block` class serves represents the  blocks that the player aims to eliminate.
   + ``` __init__(image: pygame.Surface, rect: pygame.Rect)```: Initializes the block object.
   + ```is_destroyed() -> bool```: Returns whether the block is destroyed or not.
   + ```set_is_destroyed()``` : Marks the block as destroyed.
 
-#### LevelMarker Class 
-- The LevelMarker class is responsible for creating and configuring levels within the game environment.
+#### `LevelMarker` Class 
+- The `LevelMarker` class is responsible for creating and configuring levels within the game environment.
   +   ```__init__(image: pygame.Surface, rect: pygame.Rect)```: Initializes the block object.
   + ```is_destroyed() -> bool```: Returns whether the block is destroyed or not.
   + ```set_is_destroyed()```: Marks the block as destroyed.
 
-#### Platform Class
-- The Platform class is needed for representing the platform entity within the game.
+#### `Platform` Class
+- The `Platform` class is needed for representing the platform entity within the game.
   + ``` __init__(image: pygame.Surface, rect: pygame.Rect, speed: Vector2)```: Initializes the platform object.
   + ```move()```: Moves the platform left or right.
   
-#### Functions of entity module
+#### Functions of `entity` module
 - ```adjust_on_x_collision(movable_entity_1: MovableEntity, entity_2: Entity) -> None```: Process collisions on X axis 
 between movable entity and other entity and update their positions and speeds.
 - ```adjust_on_y_collision(movable_entity: MovableEntity) -> None```: Process collisions on Y axis between movable entity 
 and other entity and update their positions and speeds.
 
 
-## Notes
+### Notes
 Images of game objects are resized accordingly to app window resolution. Images
 of blocks is colored in rainbow colors, so it is better that the basic block 
 image has greyish color.
@@ -128,3 +136,8 @@ image has greyish color.
 Also color of text font and top line which delimeters game counters and level
 areas (and other similar drawings) is opposite to the background color, thus is
 is equal to (in RGB): (255, 255, 255) - "background color value".
+
+### Test and linting reports
+Reports are saved in ```.reports/``` directory.
+
+To run unit tests run command ```.venv/bin/pytest --html=.reports/pytest/pytest.html```. To get a linting report run command ```.venv/bin/flake8 --format=html --htmldir=.reports/flake8```.
