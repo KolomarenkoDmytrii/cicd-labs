@@ -3,8 +3,8 @@ import copy
 import pytest
 import pygame
 
-from .. import level
-from .. import entity
+from ..src import level
+from ..src import entity
 
 
 @pytest.fixture(autouse=True)
@@ -92,9 +92,10 @@ def test_processing_key_presses(monkeypatch):
         top_start=0,
     )
 
-    assert tested_level.get_game_state().is_ball_released == False
+    # realising the ball from the platform
+    assert not tested_level.get_game_state().is_ball_released
     tested_level.update()
-    assert tested_level.get_game_state().is_ball_released == True
+    assert tested_level.get_game_state().is_ball_released
 
     speed_x = platform.speed.x
     tested_level.update()
@@ -155,8 +156,6 @@ def test_victory_after_destroying_all_blocks():
         edges=pygame.Rect(0, 0, 100, 100),
         top_start=0,
     )
-
-    previous_state = copy.deepcopy(tested_level.get_game_state())
 
     tested_level.release_ball()
     tested_level.update()

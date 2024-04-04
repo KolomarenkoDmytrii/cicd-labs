@@ -3,7 +3,7 @@ import copy
 import pytest
 import pygame
 
-from .. import entity
+from ..src import entity
 
 
 @pytest.mark.parametrize(
