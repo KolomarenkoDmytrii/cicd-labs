@@ -10,12 +10,12 @@ class Game:
     """Game application class."""
 
     def __init__(
-            self,
-            edges: helpers.Edges,
-            num_of_columns: int,
-            num_of_rows: int,
-            background_color: tuple = (0, 0, 0),
-            lifes: int = 4
+        self,
+        edges: helpers.Edges,
+        num_of_columns: int,
+        num_of_rows: int,
+        background_color: tuple = (0, 0, 0),
+        lifes: int = 4,
     ):
         """Initialize the game application object.
 
@@ -36,7 +36,9 @@ class Game:
         pygame.init()
         pygame.mixer.init()
         self.lifes = lifes
-        self.music = pygame.mixer.Sound('assets/game-music.mp3')
+        self.music = pygame.mixer.Sound(
+            os.path.join(os.getcwd(), "assets", "game-music.mp3")
+        )
         self.music.play(-1)
 
         self.__edges: helpers.Edges = edges
@@ -55,9 +57,9 @@ class Game:
 
         block_width: int = round(
             (
-                    self.__edges.width
-                    - horizontal_alignment * 2
-                    - horizontal_alignment * num_of_columns
+                self.__edges.width
+                - horizontal_alignment * 2
+                - horizontal_alignment * num_of_columns
             )
             / num_of_columns
         )
@@ -103,10 +105,10 @@ class Game:
         )
 
     def __draw(
-            self,
-            sprites_group: pygame.sprite.Group | None,
-            labels: List[helpers.Label],
-            y_of_delimiter: int,
+        self,
+        sprites_group: pygame.sprite.Group | None,
+        labels: List[helpers.Label],
+        y_of_delimiter: int,
     ):
         """Update the image of the game.
 
@@ -140,10 +142,10 @@ class Game:
 
     @staticmethod
     def __render_menu(
-            font: pygame.font.Font,
-            color: tuple,
-            menu_text: str,
-            start_position: Vector2,
+        font: pygame.font.Font,
+        color: tuple,
+        menu_text: str,
+        start_position: Vector2,
     ) -> List[helpers.Label]:
         """Renders text label of the start / pause game menu text.
 

@@ -1,0 +1,11 @@
+[flake8]
+# black have larger allowed line length
+extend-ignore = E501
+exclude =
+    .git,
+    __pycache__,
+    assets,
+    .venv
+
+
+

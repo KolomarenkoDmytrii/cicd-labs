@@ -23,13 +23,15 @@ class Level:
 
     @dataclass
     class GameState:
-        """Dataclass for containing width and height of edges.
+        """Dataclass for containing and (external) reading of game state.
 
         Attributes:
             ball_released_speed (pygame.math.Vector2): Initial speed of the level ball.
             score (int): Game score of the level.
             lifes (int): Contains number of player tries (lifes)
-            is_game_over (bool): Indicates whether game is ended or not.
+            is_game_over (bool): Indicates whether game is lost or not.
+            is_game_won (bool): Indicates whether player is won or not.
+            is_ball_released (bool): Indicates whether ball is realsed from platform or not.
         """
 
         ball_released_speed: pygame.math.Vector2
@@ -40,13 +42,13 @@ class Level:
         is_player_won: bool = False
 
     def __init__(
-            self,
-            lifes: int,
-            blocks: List[entity.Block],
-            platform: entity.Platform,
-            ball: entity.Ball,
-            edges: pygame.Rect,
-            top_start: int,
+        self,
+        lifes: int,
+        blocks: List[entity.Block],
+        platform: entity.Platform,
+        ball: entity.Ball,
+        edges: pygame.Rect,
+        top_start: int,
     ):
         """Initialize the level object.
 
@@ -108,25 +110,6 @@ class Level:
         """
         return pygame.sprite.Group(self.__platform, self.__ball, *self.__blocks)
 
-    def __adjust_on_x_collision(
-            self, movable_entity_1: entity.MovableEntity, entity_2: entity.Entity
-    ) -> None:
-        """Process collisions on X axis between movable entity and other entity and update their positions and
-        speeds."""
-        if (
-                entity_2.rect.left < movable_entity_1.rect.right < entity_2.rect.right
-        ):
-            movable_entity_1.rect.right = entity_2.rect.left
-        else:
-            movable_entity_1.rect.left = entity_2.rect.right
-        movable_entity_1.speed.x = -movable_entity_1.speed.x
-
-    def __adjust_on_y_collision(self, movable_entity: entity.MovableEntity) -> None:
-        """Process collisions on Y axis between movable entity and other entity and update their positions and
-        speeds."""
-        movable_entity.rect.y -= movable_entity.speed.y
-        movable_entity.speed.y = -movable_entity.speed.y
-
     def __process_key_presses(self) -> None:
         """Process key presses and update level objects and state correspondingly."""
 
@@ -152,7 +135,7 @@ class Level:
         # Checking collision on the X axis
         self.__ball.rect.x += self.__ball.speed.x
         if self.__ball.is_collided_with(self.__platform):
-            self.__adjust_on_x_collision(self.__ball, self.__platform)
+            entity.adjust_on_x_collision(self.__ball, self.__platform)
 
         elif self.__ball.rect.right > self.__edges.right:
             self.__ball.rect.right = self.__edges.right
@@ -164,12 +147,13 @@ class Level:
         else:
             for block in self.__blocks:
                 if self.__ball.is_collided_with(block):
-                    self.__adjust_on_x_collision(self.__ball, block)
+                    entity.adjust_on_x_collision(self.__ball, block)
                     block.set_is_destroyed()
 
+        # Checking collision on the Y axis
         self.__ball.rect.y += self.__ball.speed.y
         if self.__ball.is_collided_with(self.__platform):
-            self.__adjust_on_y_collision(self.__ball)
+            entity.adjust_on_y_collision(self.__ball, self.__platform)
 
         elif self.__ball.rect.bottom > self.__edges.bottom:
             self.__reset_ball()
@@ -181,16 +165,16 @@ class Level:
         else:
             for block in self.__blocks:
                 if self.__ball.is_collided_with(block):
-                    self.__adjust_on_y_collision(self.__ball)
+                    entity.adjust_on_y_collision(self.__ball, block)
                     block.set_is_destroyed()
 
         is_squeezing_on_y = (
-                self.__ball.rect.bottom < self.__platform.rect.top
-                or self.__ball.rect.top < self.__platform.rect.bottom
+            self.__ball.rect.bottom < self.__platform.rect.top
+            or self.__ball.rect.top < self.__platform.rect.bottom
         )
         is_squeezing_on_x = (
-                self.__ball.rect.right > self.__edges.right
-                or self.__ball.rect.left < self.__edges.left
+            self.__ball.rect.right > self.__edges.right
+            or self.__ball.rect.left < self.__edges.left
         )
         if is_squeezing_on_y and is_squeezing_on_x:
             self.__ball.rect.top = self.__platform.rect.bottom

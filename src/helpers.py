@@ -15,11 +15,11 @@ class Label:
     """Class for drawing text strings."""
 
     def __init__(
-            self,
-            font: pygame.font.Font,
-            position: Vector2,
-            text: str = "",
-            color: tuple = (0, 0, 0),
+        self,
+        font: pygame.font.Font,
+        position: Vector2,
+        text: str = "",
+        color: tuple = (0, 0, 0),
     ):
         """Initialize the Label class object.
 

@@ -1,2 +1,6 @@
-pygame
 black
+flake8
+flake8-html
+pygame
+pytest
+pytest-html

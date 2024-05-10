@@ -131,3 +131,45 @@ class Platform(MovableEntity):
     def move(self):
         """Move the platform left or right."""
         self.rect.move_ip(self.speed.x, 0)
+
+
+def adjust_on_x_collision(movable_entity: MovableEntity, entity: Entity) -> None:
+    """Process collisions on X axis between movable entity and other entity and update their positions and
+    speeds.
+
+    Parameters
+    ----------
+    movable_entity : entity.MovableEntity
+        Movable entity which has collision on X axis.
+    entity : entity.Entity
+        Any other entity with which movable entity has collided.
+    """
+    # if collides on the left side
+    if entity.rect.left < movable_entity.rect.right < entity.rect.right:
+        movable_entity.rect.right = entity.rect.left
+    # if collides on the right side
+    else:
+        movable_entity.rect.left = entity.rect.right
+
+    movable_entity.speed.x = -movable_entity.speed.x
+
+
+def adjust_on_y_collision(movable_entity: MovableEntity, entity: Entity) -> None:
+    """Process collisions on Y axis between movable entity and other entity and
+        update their positions and speeds.
+
+    Parameters
+    ----------
+    movable_entity : entity.MovableEntity
+        Movable entity which has collision on Y axis.
+    entity : entity.Entity
+        Any other entity with which movable entity has collided.
+    """
+    # if collides on the top side
+    if movable_entity.rect.top < entity.rect.top < movable_entity.rect.bottom:
+        movable_entity.rect.bottom = entity.rect.top
+    # if collides on the bottom side
+    else:
+        movable_entity.rect.top = entity.rect.bottom
+
+    movable_entity.speed.y = -movable_entity.speed.y
