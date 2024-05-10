@@ -106,7 +106,7 @@ class Game:
 
     def __draw(
         self,
-        sprites_group: pygame.sprite.Group | None,
+        sprites_group: pygame.sprite.Group,
         labels: List[helpers.Label],
         y_of_delimiter: int,
     ):
