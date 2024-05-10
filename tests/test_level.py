@@ -3,8 +3,8 @@ import copy
 import pytest
 import pygame
 
-from ..src import level
-from ..src import entity
+from cicd_labs.src import level
+from cicd_labs.src import entity
 
 
 @pytest.fixture(autouse=True)
